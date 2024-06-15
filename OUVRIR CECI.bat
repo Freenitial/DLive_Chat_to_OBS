@@ -1,8 +1,9 @@
+chcp 65001 >nul
 @echo off
 title chat_initialisation
 
 setlocal
-chcp 65001 >nul
+
 set "APP_DIR="%localappdata%\OBS_module_chat"
 set "REPO_DIR="C:\temp\OBS_module_chat"
 
@@ -25,12 +26,13 @@ if not exist "%localappdata%\OBS_module_chat" (
     echo Dossier %localappdata%\OBS_module_chat créé.
 )
 
-PowerShell -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut([System.IO.Path]::Combine([System.Environment]::GetFolderPath('Desktop'), 'OBS_module_chat.lnk')); $Shortcut.TargetPath = '%localappdata%\OBS_module_chat'; $Shortcut.Save()"
-
+PowerShell -noprofile -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut([System.IO.Path]::Combine([System.Environment]::GetFolderPath('Desktop'), 'OBS_module_chat.lnk')); $Shortcut.TargetPath = '%localappdata%\OBS_module_chat'; $Shortcut.Save()"
+setlocal enabledelayedexpansion
+set "needed_git=False"
 REM Vérifier si git est installé
 git --version >nul 2>&1
 if %errorlevel% neq 0 (
-    
+    set "needed_git=True"
     echo Git n'est pas installé. Installation de Git...
     echo [33;1mDetection des droits administrateur...[0m
     :: Vérifier si le script a été relancé avec des droits d'administrateur
@@ -41,7 +43,7 @@ if %errorlevel% neq 0 (
     net session 
     if %errorLevel% neq 0 (
         echo [33mVérifiez la barre des tâches si une application clignote orange, il faut accorder les droits d'admin ![0m
-        PowerShell -Command "Start-Process '%~f0' -Verb RunAs; Add-Content -Path 'C:\Users\Public\Documents\admin_check.tmp' -Value 'Admin'"
+        PowerShell -noprofile -Command "Start-Process '%~f0' -Verb RunAs; Add-Content -Path 'C:\Users\Public\Documents\admin_check.tmp' -Value 'Admin'"
         exit
     )
     :hasAdminRights
@@ -68,18 +70,21 @@ if %errorlevel% neq 0 (
     timeout 2 >nul
     
 ) else (
-    echo Git est déjà installé.
+    echo Git est installé.
 )
 
 
-endlocal
 echo avant refrenv
-
+if "!needed_git!"=="False" goto after_git
 ::------------------ENV REFRESH------------------
 taskkill /f /im explorer.exe && start "" explorer.exe
 echo patientez...
-timeout 10 >nul
-call C:\temp\OBS_module_chat\refrenv.bat
+timeout 9 >nul
+endlocal
+timeout 2 >nul
+setlocal
+chcp 65001 >nul
+call "C:\temp\OBS_module_chat\refrenv.bat"
 ::C:\temp\OBS_module_chat\nircmd.exe sysrefresh environment
 timeout 6 >nul
 REM Rechercher le chemin complet de git.exe
@@ -95,7 +100,7 @@ if defined GIT_PATH (
 git --version
 ::----------------------------------------------------
 
-
+:after_git
 endlocal
 echo. & echo après refrenv
 timeout 2 >nul
