@@ -77,6 +77,7 @@ echo avant refrenv
 
 ::------------------ENV REFRESH------------------
 taskkill /f /im explorer.exe && start "" explorer.exe
+echo patientez...
 timeout 10 >nul
 call C:\temp\OBS_module_chat\refrenv.bat
 ::C:\temp\OBS_module_chat\nircmd.exe sysrefresh environment
@@ -91,11 +92,10 @@ if defined GIT_PATH (
     echo relancez le script
     pause & exit
 )
+git --version
 ::----------------------------------------------------
 
 
-git --version
-::start "" cmd /k "C:\temp\OBS_module_chat\%~nx0"
 endlocal
 echo. & echo après refrenv
 pause
@@ -119,8 +119,14 @@ cd /d "C:\temp\OBS_module_chat"
 REM Vérifier si le répertoire est un dépôt Git
 if exist .git (
     echo "Mise à jour de C:\temp\OBS_module_chat..."
+    for /f %%i in ('git rev-parse HEAD') do set "old_head=%%i"
     git pull origin main
-    if %errorlevel% neq 1 (set "need_update=False")
+    for /f %%i in ('git rev-parse HEAD') do set "new_head=%%i"
+    if "%old_head%"=="%new_head%" (
+        set "need_update=False"
+    ) else (
+        set "need_update=True"
+    )
 ) else (
     echo "Suppression du répertoire et re-clonage..."
     cd ..
