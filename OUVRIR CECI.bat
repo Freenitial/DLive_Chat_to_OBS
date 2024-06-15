@@ -135,7 +135,7 @@ if exist .git (
     set "need_update=True"
 )
 
-
+echo need update : %need_update%
 
 if %need_update%=="True" (
 start "" "cmd /k "C:\temp\OBS_module_chat\UPDATE.bat"
