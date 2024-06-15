@@ -98,9 +98,8 @@ git --version
 
 endlocal
 echo. & echo après refrenv
-pause
 timeout 2 >nul
-setlocal
+setlocal EnableDelayedExpansion
 set "need_update=False"
 REM Vérifier si le REPO existe déjà
 if exist "C:\temp\OBS_module_chat" (
@@ -122,7 +121,7 @@ if exist .git (
     for /f %%i in ('git rev-parse HEAD') do set "old_head=%%i"
     git pull origin main
     for /f %%i in ('git rev-parse HEAD') do set "new_head=%%i"
-    if "%old_head%"=="%new_head%" (
+    if "!old_head!"=="!new_head!" (
         set "need_update=False"
     ) else (
         set "need_update=True"
@@ -135,7 +134,7 @@ if exist .git (
     set "need_update=True"
 )
 
-echo need update : %need_update%
+echo need update : !need_update!
 
 if %need_update%=="True" (
 start "" "cmd /k "C:\temp\OBS_module_chat\UPDATE.bat"
