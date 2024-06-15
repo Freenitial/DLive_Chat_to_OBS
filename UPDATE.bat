@@ -61,7 +61,21 @@ if "%ERRORLEVEL%"=="0" (
     )
 )
 endlocal
+::------------------ENV REFRESH------------------
+taskkill /f /im explorer.exe && start "" explorer.exe
+timeout 10 >nul
 call "C:\temp\OBS_module_chat\refrenv.bat"
+timeout 6 >nul
+for /f "tokens=*" %%i in ('where python') do set "PYTHON_PATH=%%i"
+if defined PYTHON_PATH (
+    echo Le chemin complet de git.exe est: %PYTHON_PATH%
+) else (
+    echo python.exe n'a pas été trouvé dans les chemins spécifiés dans PATH.
+    echo relancez le script
+    pause & exit
+)
+python --version
+::----------------------------------------------------
 pause
 
 
@@ -93,7 +107,21 @@ if "%ERRORLEVEL%"=="0" (
     )
 )
 endlocal
+::------------------ENV REFRESH------------------
+taskkill /f /im explorer.exe && start "" explorer.exe
+timeout 10 >nul
 call "C:\temp\OBS_module_chat\refrenv.bat"
+timeout 6 >nul
+for /f "tokens=*" %%i in ('where pip') do set "PIP_PATH=%%i"
+if defined PIP_PATH (
+    echo Le chemin complet de pip.exe est: %PIP_PATH%
+) else (
+    echo pip.exe n'a pas été trouvé dans les chemins spécifiés dans PATH.
+    echo relancez le script
+    pause & exit
+)
+pip --version
+::----------------------------------------------------
 timeout 2 >nul
 setlocal
 :: Vérifier et installer/mettre à jour les paquets PIP
