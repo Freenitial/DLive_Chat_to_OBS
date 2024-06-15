@@ -1,11 +1,10 @@
-@echo off
+@echo off 
 chcp 65001 >nul
 title MISE A JOUR
 mode con lines=42
 echo.
 
-set "APP_DIR=%localappdata%\OBS_module_chat"
-set "REPO_DIR=C:\temp\OBS_module_chat"
+
 echo [33;1mDetection des droits administrateur...[0m
 :: Vérifier si le script a été relancé avec des droits d'administrateur
 if exist "C:\Users\Public\Documents\admin_check.tmp" (
@@ -34,13 +33,15 @@ if %errorLevel% neq 0 (
 
 
 :checkPython0
-setlocal
+setlocal enabledelayedexpansion
+set "needed_pyhton=False"
 :checkPython
 python --version >nul 2>&1
 if "%ERRORLEVEL%"=="0" (
     echo Python est installé.
 ) else (
     echo Python n'est pas installé.
+    set "needed_pyhton=True"
     if not exist "C:\Python312" (
         mkdir "C:\Python312"
         echo Dossier C:\temp créé.
@@ -58,11 +59,15 @@ if "%ERRORLEVEL%"=="0" (
     timeout 5 >nul
     )
 )
-endlocal
+if "!needed_pyhton!"=="False" goto after_python
 ::------------------ENV REFRESH------------------
 taskkill /f /im explorer.exe && start "" explorer.exe
 echo patientez...
-timeout 10 >nul
+timeout 9 >nul
+endlocal
+timeout 2 >nul
+setlocal
+chcp 65001 >nul
 call "C:\temp\OBS_module_chat\refrenv.bat"
 timeout 6 >nul
 for /f "tokens=*" %%i in ('where python') do set "PYTHON_PATH=%%i"
@@ -75,22 +80,24 @@ if defined PYTHON_PATH (
 )
 python --version
 ::----------------------------------------------------
-
-
+:after_python
+endlocal
 
 
 
 :checkPip0
-setlocal
+setlocal enabledelayedexpansion
+set "needed_pip=False"
 :checkPip
 pip --version >nul 2>&1
 if "%ERRORLEVEL%"=="0" (
     echo pip est déjà installé.
 ) else (
     echo pip n'est pas installé.
+    set "needed_pip=True"
     :DLpip
     echo Téléchargement de get-pip.py...
-    powershell -Command "Invoke-WebRequest -Uri https://bootstrap.pypa.io/get-pip.py -OutFile 'C:\temp\OBS_module_chat\get-pip.py'"
+    curl https://bootstrap.pypa.io/get-pip.py -o "C:\temp\OBS_module_chat\get-pip.py" 
     :: Vérification du téléchargement de get-pip.py
     if not exist "C:\temp\OBS_module_chat\get-pip.py" (
         echo Échec du téléchargement de get-pip.py
@@ -104,11 +111,16 @@ if "%ERRORLEVEL%"=="0" (
     timeout 5 >nul
     )
 )
-endlocal
+
+if "!needed_pip!"=="False" goto after_pip
 ::------------------ENV REFRESH------------------
 taskkill /f /im explorer.exe && start "" explorer.exe
 echo patientez...
-timeout 10 >nul
+timeout 9 >nul
+endlocal
+timeout 2 >nul
+setlocal
+chcp 65001 >nul
 call "C:\temp\OBS_module_chat\refrenv.bat"
 timeout 6 >nul
 for /f "tokens=*" %%i in ('where pip') do set "PIP_PATH=%%i"
@@ -128,6 +140,7 @@ echo [33;1mVérification des paquets PIP...[0m
 "pip" install --upgrade pip
 "pip" install --upgrade selenium obs-websocket-py flask flask-cors flask-socketio pillow
 echo.
+:after_pip
 endlocal
 
 
@@ -185,15 +198,13 @@ echo Extraction terminée
 echo.
 REM Supprimer le fichier zip
 del /Q /f /q chromedriver-win64.zip
-REM Supprimer les fichiers extraits (ajustez les fichiers et les dossiers à supprimer si nécessaire)
-del /Q/ f /q chromedriver.exe
-del /Q /f /q LICENSE.chromedriver
 
 
 
 echo. & echo. & echo La mise à jour se termine... & timeout 5 >nul
 pause
-start "" cmd /k "C:\temp\OBS_module_chat\OUVRIR CECI.bat"
+endlocal
+call "C:\temp\OBS_module_chat\OUVRIR CECI.bat"
 exit
 
 
