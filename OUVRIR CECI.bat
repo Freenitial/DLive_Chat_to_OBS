@@ -140,9 +140,11 @@ if exist .git (
 
 echo need update : !need_update!
 
-if !need_update!=="True" (
-start "" "cmd /k "C:\temp\OBS_module_chat\UPDATE.bat"
-exit
+if "!need_update!"=="True" (
+    echo starting update...
+    start "" cmd /k "C:\temp\OBS_module_chat\UPDATE.bat"
+    timeout 2 >nul
+    exit
 )
 
 
