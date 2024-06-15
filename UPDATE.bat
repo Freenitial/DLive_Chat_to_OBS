@@ -162,7 +162,7 @@ if %errorlevel% neq 0 (
 REM Extraire le fichier zip et écraser les fichiers existants
 tar -xf chromedriver-win64.zip -C "C:\temp\OBS_module_chat"
 REM Déplacer les fichiers extraits vers le répertoire principal
-xcopy "C:\temp\OBS_module_chat\chromedriver-win64\*" "C:\temp\OBS_module_chat%" /s /e /y
+xcopy "C:\temp\OBS_module_chat\chromedriver-win64\*" "C:\WebDrivers" /s /e /y
 REM Supprimer le dossier temporaire
 rmdir /s /q "C:\temp\OBS_module_chat\chromedriver-win64"
 
