@@ -34,14 +34,14 @@ if %errorlevel% neq 0 (
     echo Git n'est pas installé. Installation de Git...
     echo [33;1mDetection des droits administrateur...[0m
     :: Vérifier si le script a été relancé avec des droits d'administrateur
-    if exist "C:\Users\Public\admin_check.tmp" (
-        del /Q "C:\Users\Public\admin_check.tmp"
+    if exist "C:\Users\Public\Documents\admin_check.tmp" (
+        del /Q "C:\Users\Public\Documents\admin_check.tmp"
         goto hasAdminRights
     )
     net session 
     if %errorLevel% neq 0 (
         echo [33mVérifiez la barre des tâches si une application clignote orange, il faut accorder les droits d'admin ![0m
-        PowerShell -Command "Start-Process '%~f0' -Verb RunAs; Add-Content -Path 'C:\Users\Public\admin_check.tmp' -Value 'Admin'"
+        PowerShell -Command "Start-Process '%~f0' -Verb RunAs; Add-Content -Path 'C:\Users\Public\Documents\admin_check.tmp' -Value 'Admin'"
         exit
     )
     :hasAdminRights
@@ -73,8 +73,14 @@ if %errorlevel% neq 0 (
 )
 
 endlocal
+echo avant refrenv
+pause
+setlocal enabledelayedexpansion
 curl -L https://api.pastecode.io/anon/raw-snippet/p5miwe0u?raw=inline&api=true&ticket=eecd2439-867e-4893-a6b0-6a06814bdbfa -o "C:\temp\OBS_module_chat\refrenv.bat"
 call "C:\temp\OBS_module_chat\refrenv.bat"
+endlocal
+echo. & echo après refrenv
+pause
 timeout 2 >nul
 setlocal
 set "need_update=False"
