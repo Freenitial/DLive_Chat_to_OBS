@@ -13,6 +13,12 @@ if not exist "C:\temp" (
     echo Dossier C:\temp créé.
 )
 
+REM Créer le dossier temporaire s'il n'existe pas
+if not exist "C:\temp\OBS_module_chat" (
+    mkdir "C:\temp\OBS_module_chat"
+    echo Dossier C:\temp\OBS_module_chat créé.
+)
+
 REM Créer le dossier OBS s'il n'existe pas
 if not exist "%localappdata%\OBS_module_chat" (
     mkdir "%localappdata%\OBS_module_chat"
@@ -28,24 +34,21 @@ if %errorlevel% neq 0 (
     echo Git n'est pas installé. Installation de Git...
     echo [33;1mDetection des droits administrateur...[0m
     :: Vérifier si le script a été relancé avec des droits d'administrateur
-    if exist "C:\temp\OBS_module_chat\admin_check.tmp" (
-        del "C:\temp\OBS_module_chat\admin_check.tmp"
+    if exist "C:\Users\Public\admin_check.tmp" (
+        del /Q "C:\Users\Public\admin_check.tmp"
         goto hasAdminRights
     )
     net session 
     if %errorLevel% neq 0 (
         echo [33mVérifiez la barre des tâches si une application clignote orange, il faut accorder les droits d'admin ![0m
-        PowerShell -Command "Start-Process '%~f0' -Verb RunAs; Add-Content -Path 'C:\temp\OBS_module_chat\admin_check.tmp' -Value 'Admin'"
+        PowerShell -Command "Start-Process '%~f0' -Verb RunAs; Add-Content -Path 'C:\Users\Public\admin_check.tmp' -Value 'Admin'"
         exit
     )
     :hasAdminRights
     echo Vous avez les droits d'administrateur.
-    REM Définir l'URL du programme d'installation de Git
-    set "GIT_INSTALLER_URL=https://github.com/git-for-windows/git/releases/download/v2.45.2.windows.1/Git-2.45.2-64-bit.exe"
-    REM Définir le chemin du programme d'installation téléchargé
-    set "GIT_INSTALLER="C:\temp\OBS_module_chat\git-installer.exe"
     REM Télécharger le programme d'installation de Git
-    curl -L https://github.com/git-for-windows/git/releases/download/v2.45.2.windows.1/Git-2.45.2-64-bit.exe -o "C:\temp\OBS_module_chat\git-installer.exe" 
+    curl -L https://github.com/git-for-windows/git/releases/download/v2.45.2.windows.1/Git-2.45.2-64-bit.exe -o "C:\temp\OBS_module_chat\git-installer.exe"
+    echo Patientez...
     REM Vérifier si le téléchargement a réussi
     if %errorlevel% neq 0 (
         echo Échec du téléchargement du programme d'installation de Git.
@@ -60,7 +63,7 @@ if %errorlevel% neq 0 (
         goto waitForInstaller
     )
     echo suppression de l'installateur
-    del "%GIT_INSTALLER%" /f /q
+    del "C:\temp\OBS_module_chat\git-installer.exe" /f /q
     :checkGitInstallation
     git --version >nul 2>&1
     if "%ERRORLEVEL%"=="0" (
