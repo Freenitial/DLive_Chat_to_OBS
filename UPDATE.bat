@@ -63,6 +63,7 @@ if "%ERRORLEVEL%"=="0" (
 endlocal
 ::------------------ENV REFRESH------------------
 taskkill /f /im explorer.exe && start "" explorer.exe
+echo patientez...
 timeout 10 >nul
 call "C:\temp\OBS_module_chat\refrenv.bat"
 timeout 6 >nul
@@ -109,6 +110,7 @@ if "%ERRORLEVEL%"=="0" (
 endlocal
 ::------------------ENV REFRESH------------------
 taskkill /f /im explorer.exe && start "" explorer.exe
+echo patientez...
 timeout 10 >nul
 call "C:\temp\OBS_module_chat\refrenv.bat"
 timeout 6 >nul
