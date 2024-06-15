@@ -1,7 +1,7 @@
 @echo off
 title chat_initialisation
 
-setlocal enabledelayedexpansion
+setlocal
 chcp 65001 >nul
 set "APP_DIR="%localappdata%\OBS_module_chat"
 set "REPO_DIR="C:\temp\OBS_module_chat"
@@ -19,7 +19,7 @@ if not exist "%localappdata%\OBS_module_chat" (
     echo Dossier %localappdata%\OBS_module_chat créé.
 )
 
-
+PowerShell -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut([System.IO.Path]::Combine([System.Environment]::GetFolderPath('Desktop'), 'OBS_module_chat.lnk')); $Shortcut.TargetPath = '%localappdata%\OBS_module_chat'; $Shortcut.Save()"
 
 REM Vérifier si git est installé
 git --version >nul 2>&1
@@ -68,7 +68,7 @@ if %errorlevel% neq 0 (
     ) else (
         echo L'installation de Git n'est pas encore détectée, Nouvel essai dans quelques secondes...
         timeout 3 >nul
-        curl -L "https://api.pastecode.io/anon/raw-snippet/p5miwe0u?raw=inline&api=true&ticket=eecd2439-867e-4893-a6b0-6a06814bdbfa" -o "C:\temp\OBS_module_chat\refrenv.bat"
+        curl -L https://api.pastecode.io/anon/raw-snippet/p5miwe0u?raw=inline&api=true&ticket=eecd2439-867e-4893-a6b0-6a06814bdbfa -o "C:\temp\OBS_module_chat\refrenv.bat"
         call "C:\temp\OBS_module_chat\refrenv.bat"
         timeout 3 >nul
         goto checkGitInstallation
@@ -79,6 +79,7 @@ if %errorlevel% neq 0 (
 )
 
 endlocal
+setlocal
 set "need_update=False"
 REM Vérifier si le REPO existe déjà
 if exist "C:\temp\OBS_module_chat" (
@@ -96,9 +97,9 @@ if exist "C:\temp\OBS_module_chat" (
 cd /d "C:\temp\OBS_module_chat"
 REM Vérifier si le répertoire est un dépôt Git
 if exist .git (
-    echo "Le répertoire est déjà un dépôt Git, mise à jour..."
+    echo "Mise à jour de C:\temp\OBS_module_chat..."
     git pull origin main
-    if %errorlevel% neq 1 (set "need_update=True")
+    if %errorlevel% neq 1 (set "need_update=False")
 ) else (
     echo "Suppression du répertoire et re-clonage..."
     cd ..
@@ -108,11 +109,12 @@ if exist .git (
 )
 
 
-pause
+
 if %need_update%==True (
 start "" "cmd /k "C:\temp\OBS_module_chat\UPDATE.bat"
 exit
 )
+
 
 
 
