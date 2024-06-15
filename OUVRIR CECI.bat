@@ -66,18 +66,36 @@ if %errorlevel% neq 0 (
     echo suppression de l'installateur
     del "C:\temp\OBS_module_chat\git-installer.exe" /f /q
     timeout 2 >nul
-
     
 ) else (
     echo Git est déjà installé.
 )
 
+
 endlocal
 echo avant refrenv
-pause
-setlocal enabledelayedexpansion
-curl -L https://api.pastecode.io/anon/raw-snippet/p5miwe0u?raw=inline&api=true&ticket=eecd2439-867e-4893-a6b0-6a06814bdbfa -o "C:\temp\OBS_module_chat\refrenv.bat"
-call "C:\temp\OBS_module_chat\refrenv.bat"
+
+::------------------ENV REFRESH------------------
+taskkill /f /im explorer.exe && start "" explorer.exe
+timeout 10 >nul
+call C:\temp\OBS_module_chat\refrenv.bat
+::C:\temp\OBS_module_chat\nircmd.exe sysrefresh environment
+timeout 6 >nul
+REM Rechercher le chemin complet de git.exe
+for /f "tokens=*" %%i in ('where git') do set "GIT_PATH=%%i"
+REM Vérifier si git.exe a été trouvé
+if defined GIT_PATH (
+    echo Le chemin complet de git.exe est: %GIT_PATH%
+) else (
+    echo git.exe n'a pas été trouvé dans les chemins spécifiés dans PATH.
+    echo relancez le script
+    pause & exit
+)
+::----------------------------------------------------
+
+
+git --version
+::start "" cmd /k "C:\temp\OBS_module_chat\%~nx0"
 endlocal
 echo. & echo après refrenv
 pause
