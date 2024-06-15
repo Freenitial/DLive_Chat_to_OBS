@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Panel</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            overflow: hidden;
+        }
+        #chat-panel {
+            width: 220px;
+            height: 600px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #333;
+            background-color: #2e2e2e;
+            border-radius: 5px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 5px;
+            border-radius: 3px;
+            background-color: #3e3e3e;
+            animation: fadeIn 0.5s ease-in-out;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .message.removing {
+            opacity: 0;
+            animation: fadeOut 0.5s ease-in-out;
+        }
+        .timestamp {
+            color: #bbbbbb;
+            font-size: 12px;
+        }
+        .username {
+            font-weight: bold;
+        }
+        .text {
+            color: #dddddd;
+        }
+        .text img {
+            max-width: 24px;
+            max-height: 24px;
+            vertical-align: middle;
+            transform: translateY(-1px);
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+        }
+    </style>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+</head>
+<body>
+    <div id="chat-panel"></div>
+    <script>
+        const socket = io();
+
+        const colors = [
+            '#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6', 
+            '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D',
+            '#80B300', '#809900', '#E6B3B3', '#6680B3', '#66991A', 
+            '#FF99E6', '#CCFF1A', '#FF1A66', '#E6331A', '#33FFCC',
+            '#66994D', '#B366CC', '#4D8000', '#B33300', '#CC80CC', 
+            '#66664D', '#991AFF', '#E666FF', '#4DB3FF', '#1AB399',
+            '#E666B3', '#33991A'
+        ];
+
+        const userColors = {};
+        let colorIndex = 0;
+
+        console.stdlog = console.log.bind(console);
+        console.stdwarn = console.warn.bind(console);
+        console.stderror = console.error.bind(console);
+
+        console.log = function(...args) {
+            console.stdlog(...args);
+            socket.emit('console_log', {level: 'log', message: args});
+        };
+
+        console.warn = function(...args) {
+            console.stdwarn(...args);
+            socket.emit('console_log', {level: 'warn', message: args});
+        };
+
+        console.error = function(...args) {
+            console.stderror(...args);
+            socket.emit('console_log', {level: 'error', message: args});
+        };
+
+        socket.on('connect', function() {
+            console.log('Connected to server');
+        });
+
+        socket.on('new_message', function(data) {
+            console.log('Received message: ', data);
+            handleNewMessage(data.timestamp, data.pseudo, data.content);
+        });
+
+        socket.on('delete_message', function(messageText) {
+            console.log('Received delete message:', messageText);
+            deleteMessage(messageText);
+        });
+
+        function getColorForUser(username) {
+            if (!userColors[username]) {
+                userColors[username] = colors[colorIndex];
+                colorIndex = (colorIndex + 1) % colors.length;
+            }
+            return userColors[username];
+        }
+
+        async function handleNewMessage(timestamp, username, text) {
+            const processedText = await processText(text);
+            console.log('Processed text: ', processedText);
+            addMessage(timestamp, username, text, processedText);
+        }
+
+        async function processText(text) {
+            const emojiPattern = /:::(.+?):::/g;
+            let match;
+            const promises = [];
+            const emojiUrls = [];
+
+            while ((match = emojiPattern.exec(text)) !== null) {
+                const emojiName = match[1];
+                const emojiPath = `/emojis/${emojiName}.png`;
+
+                console.log('Checking if emoji exists: ', emojiPath);
+
+                if (!await fileExists(emojiPath)) {
+                    console.log('Downloading emoji: ', emojiName);
+                    promises.push(downloadAndResizeEmoji(emojiName, emojiPath));
+                }
+                emojiUrls.push({ name: emojiName, path: emojiPath });
+            }
+
+            await Promise.all(promises);
+
+            emojiUrls.forEach(emoji => {
+                const imgTag = `<img src="${emoji.path}" alt="${emoji.name}" style="max-width: 24px; max-height: 24px; vertical-align: middle; transform: translateY(-1px);">`;
+                text = text.replace(new RegExp(`:::${emoji.name}:::`, 'g'), imgTag);
+            });
+
+            return text;
+        }
+
+
+        function fileExists(path) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(true);
+                img.onerror = () => resolve(false);
+                img.src = path;
+            });
+        }
+
+        function downloadAndResizeEmoji(emojiName, path) {
+            return new Promise((resolve, reject) => {
+                fetch('/download_emoji', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ emoji_name: emojiName })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        console.log('Emoji downloaded and resized: ', emojiName);
+                        resolve();
+                    } else {
+                        reject(new Error(data.message));
+                    }
+                })
+                .catch(err => reject(err));
+            });
+        }
+
+        function addMessage(timestamp, username, originalText, processedText) {
+            const chatPanel = document.getElementById('chat-panel');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.setAttribute('data-original-text', originalText);
+
+            const timestampSpan = document.createElement('span');
+            timestampSpan.classList.add('timestamp');
+            timestampSpan.textContent = timestamp + ' ';
+
+            const usernameSpan = document.createElement('span');
+            usernameSpan.classList.add('username');
+            usernameSpan.textContent = username + ': ';
+            usernameSpan.style.color = getColorForUser(username);
+
+            const textSpan = document.createElement('span');
+            textSpan.classList.add('text');
+            textSpan.innerHTML = processedText;
+
+            messageDiv.appendChild(timestampSpan);
+            messageDiv.appendChild(usernameSpan);
+            messageDiv.appendChild(textSpan);
+
+            chatPanel.appendChild(messageDiv);
+            chatPanel.scrollTop = chatPanel.scrollHeight;
+
+            console.log('Message added: ', { timestamp, username, processedText });
+        }
+
+        function deleteMessage(messageText) {
+            const chatPanel = document.getElementById('chat-panel');
+            const messageDivs = chatPanel.getElementsByClassName('message');
+            const messagesToDelete = [];
+
+            for (let i = 0; i < messageDivs.length; i++) {
+                const messageDiv = messageDivs[i];
+                const originalText = messageDiv.getAttribute('data-original-text');
+
+                if (originalText === messageText) {
+                    messagesToDelete.push(messageDiv);
+                }
+            }
+
+            messagesToDelete.forEach(messageDiv => {
+                messageDiv.classList.add('removing');
+                setTimeout(() => {
+                    chatPanel.removeChild(messageDiv);
+                    console.log('Message deleted: ', messageText);
+                }, 500);
+            });
+        }
+
+    </script>
+</body>
+</html>
