@@ -1,51 +1,122 @@
 @echo off
 title chat_initialisation
-chcp 65001 >nul
+
 setlocal enabledelayedexpansion
-set "obs_folder=%localappdata%\OBS_module_chat"
+chcp 65001 >nul
+set "APP_DIR="%localappdata%\OBS_module_chat"
+set "REPO_DIR="C:\temp\OBS_module_chat"
 
 
-REM Récupérer la version depuis l'URL avec curl
-curl -L -o temp_version.txt "https://api.pastecode.io/anon/raw-snippet/skr5y6xh?raw=inline&api=true&ticket=eecd2439-867e-4893-a6b0-6a06814bdbfa"
-set /p version=<temp_version.txt
-for /f "tokens=3 delims= " %%i in (temp_version.txt) do (
-    set version=%%i
+REM Créer le dossier temporaire s'il n'existe pas
+if not exist "C:\temp" (
+    mkdir "C:\temp"
+    echo Dossier C:\temp créé.
 )
-:: Supprimer les guillemets de la version
-set version=%version:"=%
-echo La version extraite est : %version%
-REM Chemin vers le fichier version.txt sur le bureau
-set "version_file=%obs_folder%\version.txt"
 
 REM Créer le dossier OBS s'il n'existe pas
-if not exist "%obs_folder%" (
-    mkdir "%obs_folder%"
-    echo Dossier %obs_folder% créé.
+if not exist "%localappdata%\OBS_module_chat" (
+    mkdir "%localappdata%\OBS_module_chat"
+    echo Dossier %localappdata%\OBS_module_chat créé.
 )
 
-REM Vérifier si le fichier version.txt existe
-if not exist "%version_file%" (
-    echo Le fichier %version_file% n'existe pas. Création du fichier avec la version extraite.
-    echo version = %version% > "%version_file%"
-) else (
-    REM Lire la version existante du fichier version.txt
-    for /f "tokens=3 delims= " %%j in (%version_file%) do (
-        set old_version=%%j
+
+
+REM Vérifier si git est installé
+git --version >nul 2>&1
+if %errorlevel% neq 0 (
+    
+    echo Git n'est pas installé. Installation de Git...
+    echo [33;1mDetection des droits administrateur...[0m
+    :: Vérifier si le script a été relancé avec des droits d'administrateur
+    if exist "C:\temp\OBS_module_chat\admin_check.tmp" (
+        del "C:\temp\OBS_module_chat\admin_check.tmp"
+        goto hasAdminRights
     )
-    REM Supprimer les guillemets de l'ancienne version
-    set old_version=%old_version:"=%
-    REM Comparer les versions
-    if %version% gtr %old_version% (
-        echo La nouvelle version est plus récente. Mise à jour, veuillez patienter...
-        echo version = %version% > "%version_file%"
-        curl -L -o "%obs_folder%\INSTALL MAJ.bat" "https://api.pastecode.io/anon/raw-snippet/svs9stvw?raw=inline&api=true&ticket=eecd2439-867e-4893-a6b0-6a06814bdbfa"
-        cmd /k "%obs_folder%\INSTALL MAJ.bat"
-        del temp_version.txt
-        timeout 3 >nul & exit
+    net session 
+    if %errorLevel% neq 0 (
+        echo [33mVérifiez la barre des tâches si une application clignote orange, il faut accorder les droits d'admin ![0m
+        PowerShell -Command "Start-Process '%~f0' -Verb RunAs; Add-Content -Path 'C:\temp\OBS_module_chat\admin_check.tmp' -Value 'Admin'"
+        exit
+    )
+    :hasAdminRights
+    echo Vous avez les droits d'administrateur.
+    REM Définir l'URL du programme d'installation de Git
+    set "GIT_INSTALLER_URL=https://github.com/git-for-windows/git/releases/download/v2.45.2.windows.1/Git-2.45.2-64-bit.exe"
+    REM Définir le chemin du programme d'installation téléchargé
+    set "GIT_INSTALLER="C:\temp\OBS_module_chat\git-installer.exe"
+    REM Télécharger le programme d'installation de Git
+    curl -L https://github.com/git-for-windows/git/releases/download/v2.45.2.windows.1/Git-2.45.2-64-bit.exe -o "C:\temp\OBS_module_chat\git-installer.exe" 
+    REM Vérifier si le téléchargement a réussi
+    if %errorlevel% neq 0 (
+        echo Échec du téléchargement du programme d'installation de Git.
+        exit /b 1
+    )
+    REM Exécuter le programme d'installation de Git en mode silencieux
+    start "" /wait "C:\temp\OBS_module_chat\git-installer.exe" /VERYSILENT /NORESTART
+    :waitForInstaller
+    timeout 5 >nul
+    tasklist /FI "IMAGENAME eq git-installer.exe" 2>NUL | find /I "git-installer.exe" >NUL
+    if "%ERRORLEVEL%"=="0" (
+        goto waitForInstaller
+    )
+    echo suppression de l'installateur
+    del "%GIT_INSTALLER%" /f /q
+    :checkGitInstallation
+    git --version >nul 2>&1
+    if "%ERRORLEVEL%"=="0" (
+        echo Git a été installé avec succès.
     ) else (
-        echo La version actuelle est déjà à jour.
+        echo L'installation de Git n'est pas encore détectée, Nouvel essai dans quelques secondes...
+        timeout 3 >nul
+        curl -L "https://api.pastecode.io/anon/raw-snippet/p5miwe0u?raw=inline&api=true&ticket=eecd2439-867e-4893-a6b0-6a06814bdbfa" -o "C:\temp\OBS_module_chat\refrenv.bat"
+        call "C:\temp\OBS_module_chat\refrenv.bat"
+        timeout 3 >nul
+        goto checkGitInstallation
     )
+    
+) else (
+    echo Git est déjà installé.
 )
+
+endlocal
+set "need_update=False"
+REM Vérifier si le REPO existe déjà
+if exist "C:\temp\OBS_module_chat" (
+    REM Changer de répertoire vers le répertoire existant
+    cd /d "C:\temp\OBS_module_chat"
+) else (
+    mkdir "C:\temp\OBS_module_chat"
+    echo Dossier C:\temp\OBS_module_chat créé.
+    REM Cloner le dépôt
+    git clone https://github.com/djleo70/obs_python_flask.git "C:\temp\OBS_module_chat"
+    set "need_update=True"
+)
+
+
+cd /d "C:\temp\OBS_module_chat"
+REM Vérifier si le répertoire est un dépôt Git
+if exist .git (
+    echo "Le répertoire est déjà un dépôt Git, mise à jour..."
+    git pull origin main
+    if %errorlevel% neq 1 (set "need_update=True")
+) else (
+    echo "Suppression du répertoire et re-clonage..."
+    cd ..
+    rmdir /s /q "C:\temp\OBS_module_chat"
+    git clone https://github.com/djleo70/obs_python_flask.git "C:\temp\OBS_module_chat"
+    set "need_update=True"
+)
+
+
+pause
+if %need_update%==True (
+start "" "cmd /k "C:\temp\OBS_module_chat\UPDATE.bat"
+exit
+)
+
+
+
+endlocal
 
 
 
@@ -57,7 +128,7 @@ setlocal
 rem Vérifier si obs64.exe est en cours d'exécution
 tasklist /FI "IMAGENAME eq obs64.exe" 2>NUL | find /I /N "obs64.exe">NUL
 if "%ERRORLEVEL%"=="0" (
-    echo OBS Studio est déjà en cours d'exécution.
+    echo OBS Studio est ouvert...
 ) else (
     echo Lancement de OBS Studio...
     rem Lancer OBS Studio (64bit) depuis shell:appsfolder
@@ -75,22 +146,22 @@ if "%ERRORLEVEL%"=="0" (
 )
 
 rem Vérifier et relancer SCRIPT OBS FLASK.py si nécessaire
-echo Vérification de l'exécution de SCRIPT OBS FLASK.py...
-for /f "tokens=2 delims=," %%a in ('tasklist /fi "imagename eq cmd.exe" /v /fo:csv /nh ^| findstr /r /c:".*chat_module_[^,]*$"') do (
+echo Lancement SCRIPT OBS FLASK.py...
+for /f "tokens=2 delims=," %%a in ('tasklist /fi "imagename eq cmd.exe" /v /fo:csv /nh ^| findstr /r /c:".*chat_module[^,]*$"') do (
     echo Le script est déjà ouvert. Fermeture...
     taskkill /pid %%a
     timeout 3 >nul
     echo Relancement du script...
-    title chat_module_%version%
+    title chat_module
     timeout 1 >nul
-    cmd /c "python "%obs_folder%\SCRIPT OBS FLASK.py""
+    cmd /c "python "%localappdata%\OBS_module_chat\SCRIPT OBS FLASK.py""
     goto end
 )
-title chat_module_%version%
+title chat_module
 rem Lancer SCRIPT OBS FLASK.py si non trouvé en cours d'exécution
 echo Lancement du script OBS FLASK.py...
 
-cmd /c "python "%obs_folder%\SCRIPT OBS FLASK.py""
+cmd /c "python "%localappdata%\OBS_module_chat\SCRIPT OBS FLASK.py""
 
 :end
 endlocal
