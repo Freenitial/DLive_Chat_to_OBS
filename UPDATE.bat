@@ -25,8 +25,6 @@ if %errorLevel% neq 0 (
 
 
 
-pause
-
 
 
 
@@ -77,7 +75,6 @@ if defined PYTHON_PATH (
 )
 python --version
 ::----------------------------------------------------
-pause
 
 
 
@@ -135,7 +132,7 @@ endlocal
 
 
 
-
+echo pause après pip & pause
 
 
 
@@ -186,12 +183,6 @@ if %errorlevel% neq 0 (
 )
 echo Extraction terminée
 echo.
-echo Appel de :copy_if_newer "C:\temp\OBS_module_chat\LICENSE.chromedriver" "C:\WebDrivers\LICENSE.chromedriver"
-call :copy_if_newer "C:\temp\OBS_module_chat\LICENSE.chromedriver" "C:\WebDrivers\LICENSE.chromedriver"
-echo.
-echo Appel de :copy_if_newer "C:\temp\OBS_module_chat\chromedriver.exe" "C:\WebDrivers\chromedriver.exe"
-call :copy_if_newer "C:\temp\OBS_module_chat\chromedriver.exe" "C:\WebDrivers\chromedriver.exe"
-echo.
 REM Supprimer le fichier zip
 del /Q /f /q chromedriver-win64.zip
 REM Supprimer les fichiers extraits (ajustez les fichiers et les dossiers à supprimer si nécessaire)
@@ -200,11 +191,7 @@ del /Q /f /q LICENSE.chromedriver
 
 
 
-echo. & echo. & echo  FIN DE LA MISE A JOUR & timeout 5 >nul
-pause
-set "SRC_DIR=C:\temp\OBS_module_chat"
-for %%i in ("C:\temp\OBS_module_chat") do set "PARENT_DIR=%%~dpi"
-echo le dossier cible est traité : C:\temp\OBS_module_chat
+echo. & echo. & echo La mise à jour se termine... & timeout 5 >nul
 pause
 start "" cmd /k "C:\temp\OBS_module_chat\OUVRIR CECI.bat"
 exit
