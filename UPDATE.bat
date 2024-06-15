@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 title MISE A JOUR
 mode con lines=42
 echo.
@@ -7,19 +8,16 @@ set "APP_DIR=%localappdata%\OBS_module_chat"
 set "REPO_DIR=C:\temp\OBS_module_chat"
 echo [33;1mDetection des droits administrateur...[0m
 :: Vérifier si le script a été relancé avec des droits d'administrateur
-set "adminTempFile=C:\temp\OBS_module_chat\admin_check.tmp"
-if exist "C:\temp\OBS_module_chat\admin_check.tmp" (
-del /Q "C:\temp\OBS_module_chat\admin_check.tmp"
+if exist "C:\Users\Public\admin_check.tmp" (
+del /Q "C:\Users\Public\admin_check.tmp"
 goto hasAdminRights
 )
 
 net session >nul 2>&1
 if %errorLevel% neq 0 (
-echo [33mVérifiez la barre des tâches si une application clignote orange, il faut accorder les droits d'admin ![0m
-PowerShell -Command "Start-Process '%~f0' -Verb RunAs"
-:: Créer un fichier temporaire pour indiquer que le script a été relancé avec des droits d'administrateur
-echo Admin > "C:\temp\OBS_module_chat"
-exit
+    echo [33mVérifiez la barre des tâches si une application clignote orange, il faut accorder les droits d'admin ![0m
+    PowerShell -Command "Start-Process '%~f0' -Verb RunAs; Add-Content -Path 'C:\Users\Public\admin_check.tmp' -Value 'Admin'"
+    exit
 )
 
 :hasAdminRights
@@ -50,7 +48,7 @@ if "%ERRORLEVEL%"=="0" (
         echo Dossier C:\temp créé.
     )
     "bitsadmin.exe" /transfer "PythonInstaller" "https://www.python.org/ftp/python/3.12.4/python-3.12.4-amd64.exe" "C:\temp\OBS_module_chat\python-installer.exe"
-    echo Lancement de l'installation de Python
+    echo Lancement de l'installation de Python, patientez...
     "C:\temp\OBS_module_chat\python-installer.exe" /quiet InstallAllUsers=1 PrependPath=1 DefaultCustomInstall=1 DefaultPath=%installDir%
     :waitForInstaller
     timeout 5 >nul
@@ -59,21 +57,11 @@ if "%ERRORLEVEL%"=="0" (
         goto waitForInstaller
     )
     del /Q "C:\temp\OBS_module_chat\python-installer.exe" /f /q
-    :checkPythonInstallation
-    python --version >nul 2>&1
-    if "%ERRORLEVEL%"=="0" (
-        echo Python a été installé avec succès.
-    ) else (
-        echo L'installation de Python n'est pas encore détectée, attente de 10 secondes et réessai...
-        timeout 3 >nul
-        curl -L https://api.pastecode.io/anon/raw-snippet/p5miwe0u?raw=inline&api=true&ticket=eecd2439-867e-4893-a6b0-6a06814bdbfa -o "C:\temp\OBS_module_chat\refrenv.bat"
-        call "C:\temp\OBS_module_chat\refrenv.bat"
-        timeout 3 >nul
-        goto checkPythonInstallation
+    timeout 5 >nul
     )
-    call "C:\temp\OBS_module_chat\refrenv.bat"
 )
 endlocal
+call "C:\temp\OBS_module_chat\refrenv.bat"
 pause
 
 
@@ -101,17 +89,12 @@ if "%ERRORLEVEL%"=="0" (
     :: Exécution de get-pip.py pour installer pip
     echo Installation de pip...
     python "C:\temp\OBS_module_chat\get-pip.py"
-    :: Vérification de l'installation de pip
-    "pip" --version >nul 2>&1
-    if "%ERRORLEVEL%"=="0" (
-        echo pip a été installé avec succès.
-        call "C:\temp\OBS_module_chat\refrenv.bat"
-    ) else (
-        echo L'installation de pip a échoué.
-        pause & exit
+    timeout 5 >nul
     )
 )
 endlocal
+call "C:\temp\OBS_module_chat\refrenv.bat"
+timeout 2 >nul
 setlocal
 :: Vérifier et installer/mettre à jour les paquets PIP
 echo [33;1mVérification des paquets PIP...[0m
