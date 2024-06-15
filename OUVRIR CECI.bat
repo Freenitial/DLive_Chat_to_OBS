@@ -52,6 +52,7 @@ if %errorlevel% neq 0 (
     REM Vérifier si le téléchargement a réussi
     if %errorlevel% neq 0 (
         echo Échec du téléchargement du programme d'installation de Git.
+        pause
         exit /b 1
     )
     REM Exécuter le programme d'installation de Git en mode silencieux
@@ -64,24 +65,16 @@ if %errorlevel% neq 0 (
     )
     echo suppression de l'installateur
     del "C:\temp\OBS_module_chat\git-installer.exe" /f /q
-    :checkGitInstallation
-    git --version >nul 2>&1
-    if "%ERRORLEVEL%"=="0" (
-        echo Git a été installé avec succès.
-    ) else (
-        echo L'installation de Git n'est pas encore détectée, Nouvel essai dans quelques secondes...
-        timeout 3 >nul
-        curl -L https://api.pastecode.io/anon/raw-snippet/p5miwe0u?raw=inline&api=true&ticket=eecd2439-867e-4893-a6b0-6a06814bdbfa -o "C:\temp\OBS_module_chat\refrenv.bat"
-        call "C:\temp\OBS_module_chat\refrenv.bat"
-        timeout 3 >nul
-        goto checkGitInstallation
-    )
+    timeout 2 >nul
+
     
 ) else (
     echo Git est déjà installé.
 )
 
 endlocal
+call "C:\temp\OBS_module_chat\refrenv.bat"
+timeout 2 >nul
 setlocal
 set "need_update=False"
 REM Vérifier si le REPO existe déjà
