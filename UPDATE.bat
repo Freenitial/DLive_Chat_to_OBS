@@ -8,15 +8,15 @@ set "APP_DIR=%localappdata%\OBS_module_chat"
 set "REPO_DIR=C:\temp\OBS_module_chat"
 echo [33;1mDetection des droits administrateur...[0m
 :: Vérifier si le script a été relancé avec des droits d'administrateur
-if exist "C:\Users\Public\admin_check.tmp" (
-del /Q "C:\Users\Public\admin_check.tmp"
+if exist "C:\Users\Public\Documents\admin_check.tmp" (
+del /Q "C:\Users\Public\Documents\admin_check.tmp"
 goto hasAdminRights
 )
 
 net session >nul 2>&1
 if %errorLevel% neq 0 (
     echo [33mVérifiez la barre des tâches si une application clignote orange, il faut accorder les droits d'admin ![0m
-    PowerShell -Command "Start-Process '%~f0' -Verb RunAs; Add-Content -Path 'C:\Users\Public\admin_check.tmp' -Value 'Admin'"
+    PowerShell -Command "Start-Process '%~f0' -Verb RunAs; Add-Content -Path 'C:\Users\Public\Documents\admin_check.tmp' -Value 'Admin'"
     exit
 )
 
