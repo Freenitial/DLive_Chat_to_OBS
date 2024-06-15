@@ -113,6 +113,10 @@ if exist "C:\temp\OBS_module_chat" (
     set "need_update=True"
 )
 
+if %need_update%=="True" (
+start "" "cmd /k "C:\temp\OBS_module_chat\UPDATE.bat"
+exit
+)
 
 cd /d "C:\temp\OBS_module_chat"
 REM Vérifier si le répertoire est un dépôt Git
@@ -136,7 +140,7 @@ if exist .git (
 
 echo need update : !need_update!
 
-if %need_update%=="True" (
+if !need_update!=="True" (
 start "" "cmd /k "C:\temp\OBS_module_chat\UPDATE.bat"
 exit
 )
