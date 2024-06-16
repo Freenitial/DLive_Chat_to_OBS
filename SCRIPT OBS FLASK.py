@@ -67,7 +67,7 @@ def connect_ws():
             ws.connect()
     except ConnectionFailure as e:
         print(Fore.RED + f"Erreur de connexion : {e}" + Style.RESET_ALL)
-        show_error_image("ACTIVEZ WEBSOCKET DANS OBS COMME CECI")
+        show_error_image("ACTIVEZ WEBSOCKET DANS OBS COMME CECI\nParamètre absent ? Relancez OBS")
         raise e
 
 def disconnect_ws():
@@ -84,7 +84,7 @@ def get_active_scene_name():
         print("Scène active :", active_scene_name)
         return active_scene_name
     except Exception as e:
-        show_error_image("ACTIVEZ WEBSOCKET DANS OBS COMME CECI")
+        show_error_image("ACTIVEZ WEBSOCKET DANS OBS COMME CECI\nParamètre absent ? Relancez OBS")
         raise e
 
 def show_error_image(message):
@@ -184,7 +184,7 @@ def show_dialog(root):
             else:
                 root.destroy()
         except Exception as e:
-            show_error_image("ACTIVEZ WEBSOCKET DANS OBS COMME CECI")
+            show_error_image("ACTIVEZ WEBSOCKET DANS OBS COMME CECI\nParamètre absent ? Relancez OBS")
 
     def cancel():
         disconnect_ws()
@@ -222,7 +222,7 @@ def main_loop():
         if not check_chat_obs():
             show_dialog(root)
     except Exception as e:
-        show_error_image("ACTIVEZ WEBSOCKET DANS OBS COMME CECI")
+        show_error_image("ACTIVEZ WEBSOCKET DANS OBS COMME CECI\nParamètre absent ? Relancez OBS")
     root.quit()
 
 # Démarrage de la boucle de vérification
