@@ -23,10 +23,13 @@ from colorama import Fore, Style
 import tkinter as tk
 import requests
 
+local_app_data = os.environ.get("LOCALAPPDATA")
+settings_ini_path = os.path.join(local_app_data, 'OBS_module_chat', 'settings.ini')
+
 colorama.init()
 try :
     config = configparser.ConfigParser()
-    config.read('config.ini')
+    config.read(settings_ini_path)
     OBS_HOST = config.get('OBS', 'HOST')
     OBS_PORT = config.getint('OBS', 'PORT')
     OBS_PASSWORD = config.get('OBS', 'PASSWORD')
