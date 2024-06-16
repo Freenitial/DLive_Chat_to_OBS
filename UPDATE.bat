@@ -83,12 +83,10 @@ if defined PYTHON_PATH (
 python --version
 ::----------------------------------------------------
 :after_python
-endlocal
 
 
 
 :checkPip0
-setlocal enabledelayedexpansion
 set "needed_pip=False"
 :checkPip
 pip --version >nul 2>&1
@@ -109,20 +107,22 @@ if "%ERRORLEVEL%"=="0" (
     )
     :: Exécution de get-pip.py pour installer pip
     echo Installation de pip...
+    echo avant installation de pip
     python "C:\temp\OBS_module_chat\get-pip.py"
+    echo après instal pip & pause
     timeout 5 >nul
     )
 )
 
-if "!needed_pip!"=="False" goto after_pip
+
+echo  if needed pip = %needed_pip% & pause
+
+if "%needed_pip%"=="False" echo PAS besoin de pip & goto after_pip
 ::------------------ENV REFRESH------------------
 taskkill /f /im explorer.exe && start "" explorer.exe
 echo patientez...
-timeout 9 >nul
-endlocal
-timeout 2 >nul
-setlocal
-chcp 65001 >nul
+timeout 10
+
 call "C:\temp\OBS_module_chat\refrenv.bat"
 timeout 6 >nul
 for /f "tokens=*" %%i in ('where pip') do set "PIP_PATH=%%i"
@@ -135,14 +135,18 @@ if defined PIP_PATH (
 )
 pip --version
 ::----------------------------------------------------
+
+
+echo  vérifier pip & pause
 timeout 2 >nul
-setlocal
+:after_pip
 :: Vérifier et installer/mettre à jour les paquets PIP
 echo [33;1mVérification des paquets PIP...[0m
 "pip" install --upgrade pip
-"pip" install --upgrade selenium obs-websocket-py flask flask-cors flask-socketio pillow
+echo on vient de upgrade pip, on passe aux paquets & pause
+"pip" install --upgrade selenium obs-websocket-py flask flask-cors flask-socketio pillow requests
 echo.
-:after_pip
+
 endlocal
 
 
