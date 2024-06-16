@@ -59,7 +59,7 @@ if exist "%VBS_FILE%" (
 
 
 endlocal
-
+chcp 65001 >nul
 
 
 
