@@ -187,6 +187,16 @@ if exist .git (
     git clone https://github.com/djleo70/obs_python_flask.git "C:\temp\OBS_module_chat"
     set "need_update=True"
 )
+
+
+python --version >nul 2>&1
+if %ERRORLEVEL% neq 0 (
+    echo Python n'est pas installé.
+    set "need_update=True"
+) else (
+    echo Python est installé.
+)
+
 echo juste avant need2
 echo need update : !need_update!
 if "!need_update!"=="True" (
@@ -240,4 +250,5 @@ echo Lancement du script OBS FLASK.py...
 
 cmd /c "python "%localappdata%\OBS_module_chat\SCRIPT OBS FLASK.py""
 :end
+pause
 endlocal
