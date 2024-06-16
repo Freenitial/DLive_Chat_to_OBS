@@ -114,9 +114,11 @@ for /f "tokens=*" %%i in ('where python') do set "PYTHON_PATH=%%i"
 if defined PYTHON_PATH (
     echo Le chemin complet de git.exe est: %PYTHON_PATH%
 ) else (
-    echo python.exe n'a pas été trouvé dans les chemins spécifiés dans PATH.
-    echo relancez le script
-    pause & exit
+    echo. & echo python.exe n'a pas été trouvé dans les chemins spécifiés dans PATH.
+    echo le script va se relancer tout seul....
+    timeout 3 > nul
+    start "" /d "%~dp0" "%~nx0"
+    exit
 )
 python --version
 ::----------------------------------------------------
@@ -149,20 +151,6 @@ git --version >nul 2>&1
 if %errorlevel% neq 0 (
     set "needed_git=True"
     echo Git n'est pas installé. Installation de Git...
-    echo [33;1mDetection des droits administrateur...[0m
-    :: Vérifier si le script a été relancé avec des droits d'administrateur
-    if exist "C:\Users\Public\Documents\admin_check.tmp" (
-        del /Q "C:\Users\Public\Documents\admin_check.tmp"
-        goto hasAdminRights
-    )
-    net session 
-    if %errorLevel% neq 0 (
-        echo [33mVérifiez la barre des tâches si une application clignote orange, il faut accorder les droits d'admin ![0m
-        PowerShell -noprofile -Command "Start-Process '%~f0' -Verb RunAs; Add-Content -Path 'C:\Users\Public\Documents\admin_check.tmp' -Value 'Admin'"
-        exit
-    )
-    :hasAdminRights
-    echo Vous avez les droits d'administrateur.
     REM Télécharger le programme d'installation de Git
     curl -L https://github.com/git-for-windows/git/releases/download/v2.45.2.windows.1/Git-2.45.2-64-bit.exe -o "C:\temp\OBS_module_chat\git-installer.exe"
     echo Patientez...
@@ -209,9 +197,10 @@ REM Vérifier si git.exe a été trouvé
 if defined GIT_PATH (
     echo Le chemin complet de git.exe est: %GIT_PATH%
 ) else (
-    echo git.exe n'a pas été trouvé dans les chemins spécifiés dans PATH.
-    echo relancez le script
-    pause & exit
+    echo. & echo GIT.exe n'a pas été trouvé dans les chemins spécifiés dans PATH.
+    echo le script va se relancer tout seul....
+    timeout 3 > nul
+    start "" /d "%~dp0" "%~nx0"
 )
 git --version
 ::----------------------------------------------------
