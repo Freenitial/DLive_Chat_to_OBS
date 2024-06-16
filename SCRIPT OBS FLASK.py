@@ -27,18 +27,33 @@ local_app_data = os.environ.get("LOCALAPPDATA")
 settings_ini_path = os.path.join(local_app_data, 'OBS_module_chat', 'settings.ini')
 
 colorama.init()
-try :
-    config = configparser.ConfigParser()
-    config.read(settings_ini_path)
+
+if not os.path.exists(settings_ini_path):
+    raise FileNotFoundError(f"Le fichier de configuration n'existe pas : {settings_ini_path}")
+
+# Lisez le fichier de configuration
+config = configparser.ConfigParser()
+config.read(settings_ini_path, encoding='utf-8')
+
+# Affichez les sections trouvées
+print("Sections trouvées dans le fichier de configuration :", config.sections())
+
+# Lecture des valeurs
+try:
     OBS_HOST = config.get('OBS', 'HOST')
     OBS_PORT = config.getint('OBS', 'PORT')
     OBS_PASSWORD = config.get('OBS', 'PASSWORD')
     FLASK_PORT = config.getint('FLASK', 'PORT')
     CHAT_URL = config.get('CHAT', 'URL')
-except Exception as e :
-    print("\n   ATTENTION IL MANQUE LE FICHIER DE CONFIGURATION .INI\n   A METTRE DANS LE DOSSIER 'OBS_module_chat' qui est sur le bureau ")
-    input()
-    exit() 
+    
+    print(f"OBS_HOST: {OBS_HOST}")
+    print(f"OBS_PORT: {OBS_PORT}")
+    print(f"OBS_PASSWORD: {OBS_PASSWORD}")
+    print(f"FLASK_PORT: {FLASK_PORT}")
+    print(f"CHAT_URL: {CHAT_URL}")
+except configparser.NoSectionError as e:
+    print(f"Erreur: {e}")
+
 ws = obsws(OBS_HOST, OBS_PORT, OBS_PASSWORD)
 obs_chat_name=None
 source_found = False
