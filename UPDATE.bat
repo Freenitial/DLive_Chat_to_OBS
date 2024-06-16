@@ -147,9 +147,6 @@ endlocal
 
 
 
-echo pause après pip & pause
-
-
 
 setlocal enabledelayedexpansion
 :: Chemin des fichiers source et de destination
@@ -204,7 +201,6 @@ del /Q /f /q chromedriver-win64.zip
 
 
 echo. & echo. & echo La mise à jour se termine... & timeout 5 >nul
-pause
 endlocal
 call "C:\temp\OBS_module_chat\OUVRIR CECI.bat"
 exit
