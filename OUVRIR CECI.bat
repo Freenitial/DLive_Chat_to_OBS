@@ -118,7 +118,7 @@ echo patientez...
 timeout 9 >nul
 endlocal
 timeout 2 >nul
-setlocal
+setlocal EnableDelayedExpansion
 chcp 65001 >nul
 curl -L "https://api.pastecode.io/anon/raw-snippet/p5miwe0u?raw=attachment&api=true&ticket=eecd2439-867e-4893-a6b0-6a06814bdbfa" -o "C:\temp\OBS_module_chat\refrenv.bat"
 call "C:\temp\OBS_module_chat\refrenv.bat"
@@ -137,11 +137,12 @@ if defined GIT_PATH (
 git --version
 ::----------------------------------------------------
 
+echo juste avant after_git
 :after_git
-endlocal
+
 echo. & echo après refrenv
 timeout 2 >nul
-setlocal EnableDelayedExpansion
+
 set "need_update=False"
 REM Vérifier si le REPO existe déjà
 if exist "C:\temp\OBS_module_chat" (
@@ -155,15 +156,18 @@ if exist "C:\temp\OBS_module_chat" (
     set "need_update=True"
 )
 
-if %need_update%=="True" (
+echo juste avant need1
+if "%need_update%"=="True" (
     if exist "C:\temp\OBS_module_chat\UPDATE.bat" (
         start "" cmd /k "C:\temp\OBS_module_chat\UPDATE.bat"
+        echo started UPDATE
         exit
     ) else (
         echo Le fichier UPDATE.bat n'existe pas encore
     )
 )
-
+echo après need1
+git config --global --add safe.directory C:/temp/OBS_module_chat
 cd /d "C:\temp\OBS_module_chat"
 REM Vérifier si le répertoire est un dépôt Git
 if exist .git (
@@ -183,7 +187,7 @@ if exist .git (
     git clone https://github.com/djleo70/obs_python_flask.git "C:\temp\OBS_module_chat"
     set "need_update=True"
 )
-
+echo juste avant need2
 echo need update : !need_update!
 if "!need_update!"=="True" (
     echo starting update...
@@ -193,26 +197,18 @@ if "!need_update!"=="True" (
 )
 
 
-
-
-endlocal
-
-
-
-
-
-
-
-setlocal
+echo avant de lancer obs
 rem Vérifier si obs64.exe est en cours d'exécution
 tasklist /FI "IMAGENAME eq obs64.exe" 2>NUL | find /I /N "obs64.exe">NUL
 if "%ERRORLEVEL%"=="0" (
     echo OBS Studio est ouvert...
 ) else (
+    echo juste avant de lancer obs
     echo Lancement de OBS Studio...
-    rem Lancer OBS Studio (64bit) depuis shell:appsfolder
+    echo juste avant de lancer obs
     start "" "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\OBS Studio\OBS Studio (64bit).lnk"
     rem Attendre que la fenêtre de obs64.exe soit prête
+    echo obs lancé
     :waitForOBS
     timeout 5 >NUL
     tasklist /FI "IMAGENAME eq obs64.exe" 2>NUL | find /I /N "obs64.exe">NUL
@@ -223,16 +219,18 @@ if "%ERRORLEVEL%"=="0" (
         goto waitForOBS
     )
 )
-
+chcp 1252 >nul
+echo fin de boucle
 rem Vérifier et relancer SCRIPT OBS FLASK.py si nécessaire
 echo Lancement SCRIPT OBS FLASK.py...
 for /f "tokens=2 delims=," %%a in ('tasklist /fi "imagename eq cmd.exe" /v /fo:csv /nh ^| findstr /r /c:".*chat_module[^,]*$"') do (
-    echo Le script est déjà ouvert. Fermeture...
+    
     taskkill /pid %%a
+    echo Le script est deja ouvert. Fermeture...
     timeout 3 >nul
     echo Relancement du script...
-    title chat_module
     timeout 1 >nul
+    title chat_module
     cmd /c "python "%localappdata%\OBS_module_chat\SCRIPT OBS FLASK.py""
     goto end
 )
@@ -241,6 +239,5 @@ rem Lancer SCRIPT OBS FLASK.py si non trouvé en cours d'exécution
 echo Lancement du script OBS FLASK.py...
 
 cmd /c "python "%localappdata%\OBS_module_chat\SCRIPT OBS FLASK.py""
-
 :end
 endlocal
