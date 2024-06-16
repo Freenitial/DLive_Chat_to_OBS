@@ -24,7 +24,7 @@ import tkinter as tk
 import requests
 
 local_app_data = os.environ.get("LOCALAPPDATA")
-settings_ini_path = os.path.join(local_app_data, 'OBS_module_chat', 'settings.ini')
+settings_ini_path = os.path.join(local_app_data, 'OBS_module_chat', 'config.ini')
 
 colorama.init()
 
