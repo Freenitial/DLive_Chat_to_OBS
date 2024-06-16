@@ -246,6 +246,7 @@ if "%need_update%"=="True" (
 )
 echo après need1
 git config --global --add safe.directory C:/temp/OBS_module_chat
+git config --global --add safe.directory C:/Temp/OBS_module_chat
 cd /d "C:\temp\OBS_module_chat"
 REM Vérifier si le répertoire est un dépôt Git
 if exist .git (
