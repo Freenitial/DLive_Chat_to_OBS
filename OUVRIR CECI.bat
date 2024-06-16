@@ -1,4 +1,4 @@
-chcp 65001 >nul
+chcp 1252 >nul
 @echo off
 title chat_initialisation
 
@@ -26,7 +26,44 @@ if not exist "%localappdata%\OBS_module_chat" (
     echo Dossier %localappdata%\OBS_module_chat créé.
 )
 
-PowerShell -noprofile -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut([System.IO.Path]::Combine([System.Environment]::GetFolderPath('Desktop'), 'OBS_module_chat.lnk')); $Shortcut.TargetPath = '%localappdata%\OBS_module_chat'; $Shortcut.Save()"
+
+
+setlocal
+
+:: Définir les chemins
+set "TARGET_PATH=%localappdata%\OBS_module_chat"
+set "SHORTCUT_PATH="%userprofile%\Desktop\OBS_module_chat.lnk"
+
+:: Créer un fichier temporaire VBS
+set "VBS_FILE=C:\Users\Public\Documents\CreateShortcut.vbs"
+(
+    echo Set WshShell = CreateObject^(^"WScript.Shell^"^)
+    echo Set Shortcut = WshShell.CreateShortcut(^%SHORTCUT_PATH%")
+    echo Shortcut.TargetPath = "%TARGET_PATH%"
+    echo Shortcut.Save
+) > "%VBS_FILE%"
+
+:: Afficher le contenu du fichier VBS pour débogage
+type "%VBS_FILE%"
+
+:: Vérifier si le fichier VBS a été créé
+if exist "%VBS_FILE%" (
+    :: Exécuter le script VBS
+    cscript //nologo "%VBS_FILE%"
+    :: Supprimer le script VBS temporaire
+    pause
+    del "%VBS_FILE%"
+) else (
+    echo Erreur: Impossible de créer le fichier VBS temporaire.
+)
+
+
+endlocal
+
+
+
+
+
 setlocal enabledelayedexpansion
 set "needed_git=False"
 REM Vérifier si git est installé
