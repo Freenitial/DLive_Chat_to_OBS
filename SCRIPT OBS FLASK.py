@@ -164,7 +164,7 @@ def show_dialog(root):
 
     width_frame = tk.Frame(dialog, bg='#2E3B4E')
     width_frame.pack(pady=5, padx=20)
-    width_label = tk.Label(width_frame, text="Largeur: 230", bg='#2E3B4E', fg='white', font=f)
+    width_label = tk.Label(width_frame, text="Largeur: 242", bg='#2E3B4E', fg='white', font=f)
     width_label.pack(side='left')
     width_button = tk.Button(width_frame, text="Copier", command=lambda: copy_to_clipboard("230", root),
                              bg='#4682B4', fg='white', font=('Arial', 12, 'bold'))
