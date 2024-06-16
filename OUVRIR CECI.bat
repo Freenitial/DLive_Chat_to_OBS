@@ -51,7 +51,6 @@ if exist "%VBS_FILE%" (
     :: Exécuter le script VBS
     cscript //nologo "%VBS_FILE%"
     :: Supprimer le script VBS temporaire
-    pause
     del "%VBS_FILE%"
 ) else (
     echo Erreur: Impossible de créer le fichier VBS temporaire.
