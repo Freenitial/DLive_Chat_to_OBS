@@ -64,9 +64,10 @@ if "!needed_pyhton!"=="False" goto after_python
 ::------------------ENV REFRESH------------------
 taskkill /f /im explorer.exe && start "" explorer.exe
 echo patientez...
-timeout 9 >nul
-chcp 1252 >nul
+timeout 8 >nul
+chcp 65001 >nul
 curl -L "https://api.pastecode.io/anon/raw-snippet/p5miwe0u?raw=attachment&api=true&ticket=eecd2439-867e-4893-a6b0-6a06814bdbfa" -o "C:\temp\OBS_module_chat\refrenv.bat"
+timeout 2>nul
 call "C:\temp\OBS_module_chat\refrenv.bat"
 timeout 6 >nul
 for /f "tokens=*" %%i in ('where python') do set "PYTHON_PATH=%%i"
@@ -82,9 +83,12 @@ python --version
 :after_python
 
 
+echo  vérifier pip
+
 :: Vérifier et installer/mettre à jour les paquets PIP
 echo [33;1mVérification des paquets PIP...[0m
 "pip" install --upgrade pip
+echo on vient de upgrade pip, on passe aux paquets
 "pip" install --upgrade selenium obs-websocket-py flask flask-cors flask-socketio pillow requests
 echo.
 
