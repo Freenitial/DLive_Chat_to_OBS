@@ -65,10 +65,7 @@ if "!needed_pyhton!"=="False" goto after_python
 taskkill /f /im explorer.exe && start "" explorer.exe
 echo patientez...
 timeout 9 >nul
-endlocal
-timeout 2 >nul
-setlocal
-chcp 65001 >nul
+chcp 1252 >nul
 curl -L "https://api.pastecode.io/anon/raw-snippet/p5miwe0u?raw=attachment&api=true&ticket=eecd2439-867e-4893-a6b0-6a06814bdbfa" -o "C:\temp\OBS_module_chat\refrenv.bat"
 call "C:\temp\OBS_module_chat\refrenv.bat"
 timeout 6 >nul
@@ -85,65 +82,9 @@ python --version
 :after_python
 
 
-
-:checkPip0
-set "needed_pip=False"
-:checkPip
-pip --version >nul 2>&1
-if "%ERRORLEVEL%"=="0" (
-    echo pip est déjà installé.
-) else (
-    echo pip n'est pas installé.
-    set "needed_pip=True"
-    :DLpip
-    echo Téléchargement de get-pip.py...
-    curl https://bootstrap.pypa.io/get-pip.py -o "C:\temp\OBS_module_chat\get-pip.py" 
-    :: Vérification du téléchargement de get-pip.py
-    if not exist "C:\temp\OBS_module_chat\get-pip.py" (
-        echo Échec du téléchargement de get-pip.py
-        echo Appuyez sur une touche pour réessayer
-        pause
-        goto DLpip
-    )
-    :: Exécution de get-pip.py pour installer pip
-    echo Installation de pip...
-    echo avant installation de pip
-    python "C:\temp\OBS_module_chat\get-pip.py"
-    echo après instal pip & pause
-    timeout 5 >nul
-    )
-)
-
-
-echo  if needed pip = %needed_pip% & pause
-
-if "%needed_pip%"=="False" echo PAS besoin de pip & goto after_pip
-::------------------ENV REFRESH------------------
-taskkill /f /im explorer.exe && start "" explorer.exe
-echo patientez...
-timeout 10
-
-call "C:\temp\OBS_module_chat\refrenv.bat"
-timeout 6 >nul
-for /f "tokens=*" %%i in ('where pip') do set "PIP_PATH=%%i"
-if defined PIP_PATH (
-    echo Le chemin complet de pip.exe est: %PIP_PATH%
-) else (
-    echo pip.exe n'a pas été trouvé dans les chemins spécifiés dans PATH.
-    echo relancez le script
-    pause & exit
-)
-pip --version
-::----------------------------------------------------
-
-
-echo  vérifier pip & pause
-timeout 2 >nul
-:after_pip
 :: Vérifier et installer/mettre à jour les paquets PIP
 echo [33;1mVérification des paquets PIP...[0m
 "pip" install --upgrade pip
-echo on vient de upgrade pip, on passe aux paquets & pause
 "pip" install --upgrade selenium obs-websocket-py flask flask-cors flask-socketio pillow requests
 echo.
 
