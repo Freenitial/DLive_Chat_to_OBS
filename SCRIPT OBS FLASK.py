@@ -1,6 +1,6 @@
 #0.1
 
-import configparser
+import configparser, subprocess
 import os, re, sys
 import time
 from datetime import datetime, timedelta
@@ -16,7 +16,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from obswebsocket import obsws, requests as obs_request
 from obswebsocket.exceptions import ConnectionFailure
 from threading import Thread
-from PIL import Image
+from PIL import Image,ImageTk
 from io import BytesIO
 import colorama
 from colorama import Fore, Style
@@ -62,11 +62,13 @@ source_found = False
 
 
 def connect_ws():
-    if not ws.ws or not ws.ws.connected:
-        try:
+    try:
+        if not ws.ws or not ws.ws.connected:
             ws.connect()
-        except ConnectionFailure as e:
-            print(Fore.RED + f"Erreur de connexion : {e}" + Style.RESET_ALL)
+    except ConnectionFailure as e:
+        print(Fore.RED + f"Erreur de connexion : {e}" + Style.RESET_ALL)
+        show_error_image("ACTIVEZ WEBSOCKET DANS OBS COMME CECI")
+        raise e
 
 def disconnect_ws():
     if ws.ws and ws.ws.connected:
@@ -76,10 +78,41 @@ def disconnect_ws():
             print(Fore.RED + f"Erreur de déconnexion : {e}" + Style.RESET_ALL)
 
 def get_active_scene_name():
-    scene_list = ws.call(obs_request.GetSceneList())
-    active_scene_name = scene_list.getCurrentScene()
-    print("Scène active :", active_scene_name)
-    return active_scene_name
+    try:
+        scene_list = ws.call(obs_request.GetSceneList())
+        active_scene_name = scene_list.getCurrentScene()
+        print("Scène active :", active_scene_name)
+        return active_scene_name
+    except Exception as e:
+        show_error_image("ACTIVEZ WEBSOCKET DANS OBS COMME CECI")
+        raise e
+
+def show_error_image(message):
+    def retry():
+        error_dialog.destroy()
+        subprocess.Popen([sys.executable] + sys.argv)
+
+    root = tk.Tk()
+    root.withdraw()
+    error_dialog = tk.Toplevel(root)
+    error_dialog.configure(bg='#2E3B4E')
+    error_dialog.title("Erreur")
+
+    f2 = ('Arial', 18, 'bold')
+    tk.Label(error_dialog, text=message, bg='#2E3B4E', fg='#FFD700', font=f2, wraplength=660).pack(pady=20, padx=20)
+
+    image_path = os.path.join(local_app_data, 'OBS_module_chat', 'tuto.png')
+    image = Image.open(image_path)
+    photo = ImageTk.PhotoImage(image)
+
+    img_label = tk.Label(error_dialog, image=photo)
+    img_label.image = photo
+    img_label.pack(pady=10)
+
+    tk.Button(error_dialog, text="Réessayer", command=retry, bg='#4682B4', fg='white', font=('Arial', 24, 'bold')).pack(pady=20)
+    error_dialog.mainloop()
+
+
 
 def check_chat_obs():
     global source_found, obs_chat_name
@@ -141,12 +174,18 @@ def show_dialog(root):
 
     def on_enter(e): e.widget['background'] = '#3E8EDE'
     def on_leave(e): e.widget['background'] = e.widget.orig_color
+    
+
     def retry():
         dialog.destroy()
-        if not check_chat_obs():
-            show_dialog(root)
-        else:
-            root.destroy()  # Ferme proprement la fenêtre Tkinter et termine le script
+        try:
+            if not check_chat_obs():
+                show_dialog(root)
+            else:
+                root.destroy()
+        except Exception as e:
+            show_error_image("ACTIVEZ WEBSOCKET DANS OBS COMME CECI")
+
     def cancel():
         disconnect_ws()
         root.destroy()
@@ -178,8 +217,12 @@ def show_dialog(root):
 def main_loop():
     root = tk.Tk()
     root.withdraw()
-    if not check_chat_obs():
-        show_dialog(root)
+    try:
+        connect_ws()
+        if not check_chat_obs():
+            show_dialog(root)
+    except Exception as e:
+        show_error_image("ACTIVEZ WEBSOCKET DANS OBS COMME CECI")
     root.quit()
 
 # Démarrage de la boucle de vérification
