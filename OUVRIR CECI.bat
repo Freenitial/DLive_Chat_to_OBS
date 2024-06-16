@@ -4,8 +4,15 @@ title chat_initialisation
 
 setlocal
 
-set "APP_DIR="%localappdata%\OBS_module_chat"
-set "REPO_DIR="C:\temp\OBS_module_chat"
+:: "APP_DIR="%localappdata%\OBS_module_chat"
+:: "REPO_DIR="C:\temp\OBS_module_chat"
+
+if exist "obs-websocket-4.9.1.exe" (
+    echo Installation du module OBS
+    "obs-websocket-4.9.1.exe" /silent
+    timeout 3 >nul
+    del "obs-websocket-4.9.1.exe" /f /q
+)
 
 
 REM Créer le dossier temporaire s'il n'existe pas
