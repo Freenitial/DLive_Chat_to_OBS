@@ -1,7 +1,6 @@
 @echo off 
 chcp 65001 >nul
 title MISE A JOUR
-mode con lines=42
 echo.
 
 
