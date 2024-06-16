@@ -156,7 +156,7 @@ def show_dialog(root):
 
     height_frame = tk.Frame(dialog, bg='#2E3B4E')
     height_frame.pack(pady=5, padx=20)
-    height_label = tk.Label(height_frame, text="Hauteur: 600", bg='#2E3B4E', fg='white', font=f)
+    height_label = tk.Label(height_frame, text="Hauteur: 400", bg='#2E3B4E', fg='white', font=f)
     height_label.pack(side='left')
     height_button = tk.Button(height_frame, text="Copier", command=lambda: copy_to_clipboard("600", root),
                               bg='#4682B4', fg='white', font=('Arial', 12, 'bold'))
