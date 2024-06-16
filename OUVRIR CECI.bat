@@ -154,15 +154,6 @@ if %errorlevel% neq 0 (
     REM Télécharger le programme d'installation de Git
     curl -L https://github.com/git-for-windows/git/releases/download/v2.45.2.windows.1/Git-2.45.2-64-bit.exe -o "C:\temp\OBS_module_chat\git-installer.exe"
     echo Patientez...
-    REM Vérifier si le téléchargement a réussi
-    if %errorlevel% neq 0 (
-        echo Échec du téléchargement du programme d'installation de Git.
-        echo le script va se relancer tout seul....
-        timeout 3 > nul
-        start "" /d "%~dp0" "%~nx0"
-        exit
-    )
-    REM Exécuter le programme d'installation de Git en mode silencieux
     start "" /wait "C:\temp\OBS_module_chat\git-installer.exe" /VERYSILENT /NORESTART
     :waitForInstaller
     timeout 5 >nul
