@@ -197,6 +197,12 @@ if %ERRORLEVEL% neq 0 (
     echo Python est installé.
 )
 
+if not exist "%localappdata%\OBS_module_chat\SCRIPT OBS FLASK.py" (
+    echo Il manque le script.
+    set "need_update=True"
+)
+
+
 echo juste avant need2
 echo need update : !need_update!
 if "!need_update!"=="True" (
@@ -250,5 +256,4 @@ echo Lancement du script OBS FLASK.py...
 
 cmd /c "python "%localappdata%\OBS_module_chat\SCRIPT OBS FLASK.py""
 :end
-pause
 endlocal
