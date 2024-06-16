@@ -69,7 +69,7 @@ endlocal
 timeout 2 >nul
 setlocal
 chcp 65001 >nul
-curl -L https://api.pastecode.io/anon/raw-snippet/p5miwe0u?raw=attachment&api=true&ticket=eecd2439-867e-4893-a6b0-6a06814bdbfa -o "C:\temp\OBS_module_chat\refrenv.bat"
+curl -L "https://api.pastecode.io/anon/raw-snippet/p5miwe0u?raw=attachment&api=true&ticket=eecd2439-867e-4893-a6b0-6a06814bdbfa" -o "C:\temp\OBS_module_chat\refrenv.bat"
 call "C:\temp\OBS_module_chat\refrenv.bat"
 timeout 6 >nul
 for /f "tokens=*" %%i in ('where python') do set "PYTHON_PATH=%%i"
