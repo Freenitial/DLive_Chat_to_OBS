@@ -7,12 +7,22 @@ setlocal
 :: "APP_DIR="%localappdata%\OBS_module_chat"
 :: "REPO_DIR="C:\temp\OBS_module_chat"
 
+
+
+
 if exist "obs-websocket-4.9.1.exe" (
     echo Installation du module OBS
+    taskkill /IM obs64.exe /T >nul 2>&1
+    timeout > 4
     "obs-websocket-4.9.1.exe" /silent
     timeout 3 >nul
     del "obs-websocket-4.9.1.exe" /f /q
+    timeout 3 >nul
+    start "" "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\OBS Studio\OBS Studio (64bit).lnk"
 )
+
+
+
 
 
 REM Créer le dossier temporaire s'il n'existe pas
