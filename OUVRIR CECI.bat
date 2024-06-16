@@ -156,8 +156,12 @@ if exist "C:\temp\OBS_module_chat" (
 )
 
 if %need_update%=="True" (
-start "" "cmd /k "C:\temp\OBS_module_chat\UPDATE.bat"
-exit
+    if exist "C:\temp\OBS_module_chat\UPDATE.bat" (
+        start "" cmd /k "C:\temp\OBS_module_chat\UPDATE.bat"
+        exit
+    ) else (
+        echo Le fichier UPDATE.bat n'existe pas encore
+    )
 )
 
 cd /d "C:\temp\OBS_module_chat"
@@ -181,7 +185,6 @@ if exist .git (
 )
 
 echo need update : !need_update!
-
 if "!need_update!"=="True" (
     echo starting update...
     start "" cmd /k "C:\temp\OBS_module_chat\UPDATE.bat"
