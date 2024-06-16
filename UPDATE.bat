@@ -48,6 +48,7 @@ if "%ERRORLEVEL%"=="0" (
     )
     "bitsadmin.exe" /transfer "PythonInstaller" "https://www.python.org/ftp/python/3.12.4/python-3.12.4-amd64.exe" "C:\temp\OBS_module_chat\python-installer.exe"
     echo Lancement de l'installation de Python, patientez...
+    echo echo [33mVérifiez la barre des tâches si une application clignote orange, il faut accorder les droits d'admin ![0m
     "C:\temp\OBS_module_chat\python-installer.exe" /quiet InstallAllUsers=1 PrependPath=1 DefaultCustomInstall=1 DefaultPath=%installDir%
     :waitForInstaller
     timeout 5 >nul
