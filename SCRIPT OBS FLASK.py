@@ -33,7 +33,7 @@ try :
     FLASK_PORT = config.getint('FLASK', 'PORT')
     CHAT_URL = config.get('CHAT', 'URL')
 except Exception as e :
-    print("\n   ATTENTION IL MANQUE LE FICHIER DE CONFIGURATION .INI\n   A METTRE DANS LE DOSSIER '%localappdata%\OBS_module_chat'")
+    print("\n   ATTENTION IL MANQUE LE FICHIER DE CONFIGURATION .INI\n   A METTRE DANS LE DOSSIER 'OBS_module_chat' qui est sur le bureau ")
     input()
     exit() 
 ws = obsws(OBS_HOST, OBS_PORT, OBS_PASSWORD)
