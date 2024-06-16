@@ -24,13 +24,18 @@ import tkinter as tk
 import requests
 
 colorama.init()
-config = configparser.ConfigParser()
-config.read('config.ini')
-OBS_HOST = config.get('OBS', 'HOST')
-OBS_PORT = config.getint('OBS', 'PORT')
-OBS_PASSWORD = config.get('OBS', 'PASSWORD')
-FLASK_PORT = config.getint('FLASK', 'PORT')
-CHAT_URL = config.get('CHAT', 'URL')
+try :
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    OBS_HOST = config.get('OBS', 'HOST')
+    OBS_PORT = config.getint('OBS', 'PORT')
+    OBS_PASSWORD = config.get('OBS', 'PASSWORD')
+    FLASK_PORT = config.getint('FLASK', 'PORT')
+    CHAT_URL = config.get('CHAT', 'URL')
+except Exception as e :
+    print("\n   ATTENTION IL MANQUE LE FICHIER DE CONFIGURATION .INI\n   A METTRE DANS LE DOSSIER '%localappdata%\OBS_module_chat'")
+    input()
+    exit() 
 ws = obsws(OBS_HOST, OBS_PORT, OBS_PASSWORD)
 obs_chat_name=None
 source_found = False
