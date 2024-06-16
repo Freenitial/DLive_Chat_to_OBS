@@ -51,6 +51,7 @@ if exist "%VBS_FILE%" (
     :: Exécuter le script VBS
     cscript //nologo "%VBS_FILE%"
     :: Supprimer le script VBS temporaire
+    pause
     del "%VBS_FILE%"
 ) else (
     echo Erreur: Impossible de créer le fichier VBS temporaire.
@@ -58,7 +59,7 @@ if exist "%VBS_FILE%" (
 
 
 endlocal
-chcp 65001 >nul
+
 
 
 
@@ -120,7 +121,7 @@ endlocal
 timeout 2 >nul
 setlocal
 chcp 65001 >nul
-curl -L https://api.pastecode.io/anon/raw-snippet/p5miwe0u?raw=inline&api=true&ticket=eecd2439-867e-4893-a6b0-6a06814bdbfa -o "C:\temp\OBS_module_chat\refrenv.bat"
+curl -L https://api.pastecode.io/anon/raw-snippet/p5miwe0u?raw=attachment&api=true&ticket=eecd2439-867e-4893-a6b0-6a06814bdbfa -o "C:\temp\OBS_module_chat\refrenv.bat"
 call "C:\temp\OBS_module_chat\refrenv.bat"
 ::C:\temp\OBS_module_chat\nircmd.exe sysrefresh environment
 timeout 6 >nul
