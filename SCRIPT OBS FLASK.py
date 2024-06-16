@@ -156,17 +156,17 @@ def show_dialog(root):
 
     height_frame = tk.Frame(dialog, bg='#2E3B4E')
     height_frame.pack(pady=5, padx=20)
-    height_label = tk.Label(height_frame, text="Hauteur: 400", bg='#2E3B4E', fg='white', font=f)
+    height_label = tk.Label(height_frame, text="Largeur: 242", bg='#2E3B4E', fg='white', font=f)
     height_label.pack(side='left')
-    height_button = tk.Button(height_frame, text="Copier", command=lambda: copy_to_clipboard("600", root),
+    height_button = tk.Button(height_frame, text="Copier", command=lambda: copy_to_clipboard("242", root),
                               bg='#4682B4', fg='white', font=('Arial', 12, 'bold'))
     height_button.pack(side='left', padx=10)
 
     width_frame = tk.Frame(dialog, bg='#2E3B4E')
     width_frame.pack(pady=5, padx=20)
-    width_label = tk.Label(width_frame, text="Largeur: 242", bg='#2E3B4E', fg='white', font=f)
+    width_label = tk.Label(width_frame, text="Hauteur: 400", bg='#2E3B4E', fg='white', font=f)
     width_label.pack(side='left')
-    width_button = tk.Button(width_frame, text="Copier", command=lambda: copy_to_clipboard("230", root),
+    width_button = tk.Button(width_frame, text="Copier", command=lambda: copy_to_clipboard("400", root),
                              bg='#4682B4', fg='white', font=('Arial', 12, 'bold'))
     width_button.pack(side='left', padx=10)
 
