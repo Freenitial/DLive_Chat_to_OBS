@@ -89,7 +89,7 @@ echo  vérifier pip
 echo [33;1mVérification des paquets PIP...[0m
 "pip" install --upgrade pip
 echo on vient de upgrade pip, on passe aux paquets
-"pip" install --upgrade selenium obs-websocket-py flask flask-cors flask-socketio pillow requests
+"pip" install --upgrade selenium obs-websocket-py flask flask-cors flask-socketio pillow requests cairosvg
 echo.
 
 endlocal
