@@ -13,45 +13,143 @@
             color: #ffffff;
             overflow: hidden;
         }
+        #chat-panel-container {
+            width: 358px;
+            height: 688px;
+            padding: 5px;
+            padding-top: 6px;
+            background-color: transparent; /*#2e2e2e*/
+            /* border-radius: 16px;*/
+            overflow: hidden; /* Pour s'assurer que les éléments ne débordent pas */
+            position: relative; /* Pour que le header fixe soit contenu */
+        }
         #chat-panel {
-            width: 220px;
-            height: 400px;
-            overflow-y: hidden; /* Masquer la barre de défilement */
-            padding: 10px;
-            border: 1px solid #333;
-            background-color: #2e2e2e;
-            border-radius: 5px;
+            height: 100%;
+            overflow-y: scroll; /* Permettre le défilement vertical */
             word-wrap: break-word;
             white-space: pre-wrap;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none;  /* IE and Edge */
+            border-radius: 16px 16px 0 0; /* Ajout de radius en haut */
         }
+
+        #chat-panel::-webkit-scrollbar {
+            display: none; /* Chrome, Safari and Opera */
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2px;
+            position: relative; /* Pour que le timestamp soit positionné correctement */
+        }
+
+        .avatar-inner {
+            position: relative;
+            overflow: hidden;
+            border-radius: 50%;
+            border: none;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
         .message {
-            margin-bottom: 10px;
-            padding: 5px;
-            border-radius: 3px;
+            margin-bottom: 5px;
+            padding-top: 3px;
+            padding-bottom: 5px;
+            padding-left: 7px;
+            padding-right: 7px;
+            border-radius: 12px;
             background-color: #3e3e3e;
             animation: fadeIn 0.5s ease-in-out;
             transition: opacity 0.5s ease-in-out;
         }
+
         .message.removing {
             opacity: 0;
             animation: fadeOut 0.5s ease-in-out;
         }
+
+        .message-content {
+            background-color: #2b2b2b; /* Couleur de fond sombre */
+            padding: 5px;
+            border-radius: 8px;
+            margin-top: 5px; /* Pour séparer du header */
+        }
+
         .timestamp {
             color: #bbbbbb;
             font-size: 12px;
+            position: absolute;
+            right: 10px;
+            top: 5px;
         }
+
         .username {
             font-weight: bold;
+            font-size: 22px;
         }
+
         .text {
             color: #dddddd;
+            font-size: 22px;
         }
+
         .text img {
-            max-width: 24px;
-            max-height: 24px;
             vertical-align: middle;
-            transform: translateY(-1px);
+            transform: translateY(-3px);
         }
+
+        .text img.gif {
+            max-width: 150px;
+            max-height: 150px;
+        }
+
+        .message img.center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+
+
+
+        
+
+        .message.lemon {
+            background-color: rgb(238, 207, 48);
+            animation: specialAnimation 1s ease-in-out;
+        }
+
+        .message.icecream {
+            background-color: rgb(211, 225, 230);
+            animation: specialAnimation 1s ease-in-out;
+        }
+
+        .message.diamond {
+            background-color: rgb(71, 199, 241);
+            animation: specialAnimation 1s ease-in-out;
+        }
+
+        .message.ninjaghini {
+            background-color: red;
+            animation: specialAnimation 1s ease-in-out;
+        }
+
+        .message.ninjet {
+            background-color: rgb(170, 0, 255);
+            animation: specialAnimation 1s ease-in-out;
+        }
+        .message.gift .username {
+            color: black;
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -62,6 +160,13 @@
                 transform: translateY(0);
             }
         }
+
+        @keyframes specialAnimation {
+            0% { opacity: 0; transform: translateY(-10px); }
+            50% { opacity: 0.5; transform: translateY(-5px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
         @keyframes fadeOut {
             from {
                 opacity: 1;
@@ -72,11 +177,67 @@
                 transform: translateY(10px);
             }
         }
+        #fixed-header-container {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 150px);
+            z-index: 1000;
+            display: none;
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        #fixed-header-border {
+            position: absolute;
+            top: 0px;
+            left: -1px;
+            width: calc(100% + 2px);
+            height: calc(100% + 1px);
+            background-color: rgb(101, 101, 101);
+            clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%);
+            z-index: -1; /* Behind the actual header */
+        }
+
+        #fixed-header {
+            position: relative;
+            width: 100%;
+            background-color: #1f1f1f;
+            padding: 3px 7px;
+            box-sizing: border-box;
+            clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%);
+            color: white;
+            font-weight: bold;
+            text-align: center; /* Centrer le texte */
+        }
+
+        #fixed-header .timestamp {
+            position: relative;
+            left: 80px;
+            top: -4px;
+            font-size: 0.6em; /* Réduire la taille de la police */
+        }
+
+        #fixed-header .username {
+            position: absolute;
+            font-size: 1.0em; /* Réduire la taille de la police du pseudo */
+        }
+
+
+
+
+
     </style>
     <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
 </head>
 <body>
-    <div id="chat-panel"></div>
+    <div id="chat-panel-container">
+        <div id="fixed-header-container">
+            <div id="fixed-header-border"></div>
+            <div id="fixed-header"></div>
+        </div>
+        <div id="chat-panel"></div>
     <script>
         const socket = io();
 
@@ -93,9 +254,20 @@
         const userColors = {};
         let colorIndex = 0;
 
+        let showAvatar = null;
+        let showBadges = null;
+
         console.stdlog = console.log.bind(console);
         console.stdwarn = console.warn.bind(console);
         console.stderror = console.error.bind(console);
+
+        async function fetchConfig() {
+            const response = await fetch('/config');
+            const config = await response.json();
+            showAvatar = config.show_avatar;
+            showBadges = config.show_badges;
+        }
+        fetchConfig();
 
         console.log = function(...args) {
             console.stdlog(...args);
@@ -113,17 +285,30 @@
         };
 
         socket.on('connect', function() {
-            console.log('Connected to server');
+            // console.log('Connected to server');
         });
 
         socket.on('new_message', function(data) {
-            console.log('Received message: ', data);
-            handleNewMessage(data.timestamp, data.pseudo, data.content);
+            // console.log('Received message: ', data);
+            const isGiftBoolean = (data.is_gift === 'true');
+            let avatar = null;
+            let badges = [];
+            if (showAvatar) {
+                avatar = data.avatar
+            }
+            if (showBadges) {
+                badges = data.badges
+            }
+            handleNewMessage(data.timestamp, data.pseudo, data.content, avatar, badges, isGiftBoolean);
         });
 
-        socket.on('delete_message', function(messageText) {
-            console.log('Received delete message:', messageText);
-            deleteMessage(messageText);
+        socket.on('delete_message', function(data) {
+            const { pseudo, content, is_gift } = data;
+            const isGiftBoolean = (is_gift === 'true');
+            // console.log('Message deleted pseudo:', pseudo);
+            // console.log('Message deleted Content:', content);
+            // console.log('Message deleted Is gift:', isGiftBoolean);
+            deleteMessage(pseudo, content, isGiftBoolean);
         });
 
         function getColorForUser(username) {
@@ -134,44 +319,201 @@
             return userColors[username];
         }
 
-        async function handleNewMessage(timestamp, username, text) {
-            const processedText = await processText(text);
-            console.log('Processed text: ', processedText);
-            addMessage(timestamp, username, text, processedText);
+
+
+        // console.log('showAvatar: ', showAvatar);
+        // console.log('showBadges: ', showBadges);
+
+
+
+        async function handleNewMessage(timestamp, username, text, avatarLink = null, badgesLinks = [], is_gift) {
+            const { processedText, avatarPath, badgePaths, emojiUrls } = await processNewMessage(text, avatarLink, badgesLinks, is_gift);
+            
+            let newText = processedText;
+            if (is_gift) { // Supprimez le début de messageText jusqu'au premier chiffre
+                newText = newText.replace(/^[^\d]*(?=\d)/, '').trim();
+                newText = `<div style="text-align: center;">${newText}</div>`;
+                // console.log('CONTENT TO SUPPRESS: ', newText);
+                const recentMessageData = findRecentGiftMessage(username, newText);
+                if (recentMessageData) {
+                    const { recentMessage, recentValue } = recentMessageData;
+                    const newValue = extractValueFromGiftMessage(newText);
+                    deleteMessage(username, stripHTML(recentMessage.getAttribute('data-original-text')), is_gift);
+                    newText = `<div style="text-align: center;">${updateGiftMessageValue(newText, recentValue, newValue)}</div>`;
+                }
+            }
+            // console.log('Processed text: ', newText);
+            addMessage(timestamp, username, newText, avatarPath, badgePaths, is_gift);
         }
 
-        async function processText(text) {
-            const emojiPattern = /:::(.+?):::/g;
-            let match;
+
+
+        async function processNewMessage(text, avatarLink, badgesLinks, is_gift = false) {
             const promises = [];
+            const emojiUrls = [];
+            let avatarPath = null;
+            const badgePaths = [];
+            if (avatarLink) {
+                promises.push(checkAndDownloadImage(avatarLink, true).then(result => avatarPath = result.avatarPath));
+            }
+            for (const badgeLink of badgesLinks) {
+                promises.push(checkAndDownloadImage(badgeLink, false, true).then(result => badgePaths.push(result.badgePath)));
+            }
+            text = await convertEmojiLinks(text, is_gift);
+            await Promise.all(promises);
+            // console.log('REPLACED LINKS TEXT:', text);
+            return { processedText: text, avatarPath: avatarPath, badgePaths: badgePaths, emojiUrls: emojiUrls };
+        }
+
+
+        function findRecentGiftMessage(username, text) {
+            const chatPanel = document.getElementById('chat-panel');
+            const messageDivs = chatPanel.getElementsByClassName('message');
+            const giftType = extractGiftTypeFromText(text);
+
+            // console.log('Searching for recent gift message...');
+            // console.log('Username:', username);
+            // console.log('Gift type:', giftType);
+
+            const stripHTML = (html) => {
+                const div = document.createElement('div');
+                div.innerHTML = html;
+                const images = div.getElementsByTagName('img');
+                let text = div.textContent || div.innerText || "";
+                
+                // Append img tags as is
+                for (let i = 0; i < images.length; i++) {
+                    text += images[i].outerHTML;
+                }
+                return text;
+            };
+
+            for (let i = messageDivs.length - 1; i >= 0; i--) {
+                const messageDiv = messageDivs[i];
+                const messageUsername = messageDiv.getAttribute('data-username');
+                const messageContentDivs = messageDiv.getElementsByClassName('message-content');
+
+                for (let j = 0; j < messageContentDivs.length; j++) {
+                    const messageContentDiv = messageContentDivs[j];
+                    const originalText = messageContentDiv.getAttribute('data-original-text');
+                    const messageText = stripHTML(originalText);
+
+                    // console.log(`Checking message ${i} content ${j}:`);
+                    // console.log('Message username:', messageUsername);
+                    // console.log('Original text:', originalText);
+                    // console.log('Stripped text:', messageText);
+
+                    if (messageUsername === username && messageText.includes(`<img src="/emojis/gift_${giftType}`)) {
+                        const recentValue = extractValueFromGiftMessage(messageText);
+                        // console.log('Match found:');
+                        // console.log('Recent message:', messageContentDiv);
+                        // console.log('Recent value:', recentValue);
+                        return { recentMessage: messageContentDiv, recentValue: recentValue };
+                    }
+                }
+            }
+
+            // console.log('No matching recent gift message found.');
+            return null;
+        }
+
+
+        function extractGiftTypeFromText(text) {
+            const match = text.match(/gift_(.*?)\./);
+            return match ? match[1].toLowerCase() : '';
+        }
+
+        function extractValueFromGiftMessage(text) {
+            return parseInt(text.replace(/^[^\d]*(?=\d)/, '').trim());
+        }
+
+        function updateGiftMessageValue(text, recentValue, newValue) {
+            let value = newValue === 1 ? recentValue + 1 : newValue + 1;
+            return text.replace(/^[^\d]*(?=\d)/, '').trim().replace(/\d+/, value);
+        }
+
+        async function checkAndDownloadImage(link, isAvatar = false, isBadge = false) {
+            let file = link.split('/').pop();
+            let name = '';
+            let extension = '';
+            if (file.includes('.')) {
+                const parts = file.split('.');
+                extension = parts.pop().toLowerCase();
+                name = parts.join('.');
+                if (extension !== 'gif' && extension !== 'png') {
+                    extension = await getImageExtension(link);
+                    file = `${name}.${extension}`;
+                }
+            } else {
+                extension = await getImageExtension(link);
+                name = file;  // Name est le fichier sans extension
+                file += `.${extension}`;
+            }
+            let localPath = `/emojis/${file}`;
+            // Si l'extension n'est toujours pas gif ou png, la remplacer par .png
+            if (extension !== 'gif' && extension !== 'png') {
+                localPath = localPath.replace(/\.[^/.]+$/, '.png');
+                file = `${name}.png`;
+            }
+            const exists = await fileExists(localPath);
+            if (!exists) {
+                // console.log(`${isAvatar ? 'Avatar' : isBadge ? 'Badge' : 'Emoji'}: ${localPath}  --> INTROUVABLE`);
+                // console.log(`Downloading ${isAvatar ? 'avatar' : isBadge ? 'badge' : 'emoji'}: ${link}`);
+                await downloadAndResizeEmoji(link, name, extension, isAvatar, isBadge);
+            } else {
+                // console.log(`${isAvatar ? 'Avatar' : isBadge ? 'Badge' : 'Emoji'}: ${localPath}  --> EXISTE DEJA`);
+            }
+            if (isAvatar) {
+                return { avatarPath: localPath };
+            } else if (isBadge) {
+                return { badgePath: localPath };
+            } else {
+                return { emoji: { link: link, path: localPath } };
+            }
+        }
+
+        async function convertEmojiLinks(text, is_gift = false) {
+            const emojiPattern = /:::(https?:\/\/[^\s]+?):::/g;
+            let match;
             const emojiUrls = [];
 
             while ((match = emojiPattern.exec(text)) !== null) {
-                const emojiName = match[1];
-                const emojiPath = `/emojis/${emojiName}.png`;
-
-                console.log('Checking if emoji exists: ', emojiPath);
-
-                if (!await fileExists(emojiPath)) {
-                    console.log('Downloading emoji: ', emojiName);
-                    promises.push(downloadAndResizeEmoji(emojiName, emojiPath));
+                let emojiLink = match[1];
+                const result = await checkAndDownloadImage(emojiLink);
+                if (result.emoji) {
+                    emojiUrls.push(result.emoji);
                 }
-                emojiUrls.push({ name: emojiName, path: emojiPath });
             }
 
-            await Promise.all(promises);
-
-            emojiUrls.forEach(emoji => {
-                const imgTag = `<img src="${emoji.path}" alt="${emoji.name}" style="max-width: 24px; max-height: 24px; vertical-align: middle; transform: translateY(-1px);">`;
-                text = text.replace(new RegExp(`:::${emoji.name}:::`, 'g'), imgTag);
+            // Remplacer les liens emoji dans le texte par les balises img correspondantes
+            emojiUrls.forEach((emoji) => {
+                let imgTag = `<img src="${emoji.path}" class="${emoji.path.endsWith('.gif') ? 'gif' : ''}">`;
+                if (is_gift && emoji.path.endsWith('.gif')) {
+                    imgTag = `\n${imgTag}\n`;
+                }
+                text = text.replace(new RegExp(`:::${emoji.link}:::`, 'g'), imgTag);
             });
 
             return text;
         }
 
 
+        function stripHTML(html) {
+            const div = document.createElement('div');
+            div.innerHTML = html;
+            const images = div.getElementsByTagName('img');
+            let text = div.textContent || div.innerText || "";
+            
+            // Append img tags as is
+            for (let i = 0; i < images.length; i++) {
+                text += images[i].outerHTML;
+            }
+            return text;
+        }
+
+
         function fileExists(path) {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 const img = new Image();
                 img.onload = () => resolve(true);
                 img.onerror = () => resolve(false);
@@ -179,68 +521,343 @@
             });
         }
 
-        function downloadAndResizeEmoji(emojiName, path) {
+        async function getImageExtension(url) {
+            try {
+                const response = await fetch('/get_image_extension', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+                const data = await response.json();
+                return data.extension || 'unknown';
+            } catch (error) {
+                console.error('Error fetching image extension:', error);
+                return 'unknown';
+            }
+        }
+
+        async function downloadAndResizeEmoji(emojiLink, name, extension, isAvatar = false, isBadge = false) {
+            // console.log('Début du téléchargement et du redimensionnement de l\'emoji');
             return new Promise((resolve, reject) => {
+                // console.log('Envoi de la requête POST à /download_emoji');
                 fetch('/download_emoji', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ emoji_name: emojiName })
+                    body: JSON.stringify({ emoji_link: emojiLink, emoji_name: name, emoji_extension: extension, is_avatar: isAvatar, is_badge: isBadge })
                 })
-                .then(response => response.json())
+                .then(response => {
+                    // console.log('Réponse reçue du serveur, statut:', response.status);
+                    return response.json();
+                })
                 .then(data => {
+                    // console.log('Données JSON reçues:', data);
                     if (data.status === 'success') {
-                        console.log('Emoji downloaded and resized: ', emojiName);
+                        // console.log('Emoji téléchargé et redimensionné avec succès:', data.path);
                         resolve();
                     } else {
+                        // console.log(emojiLink, 'Erreur lors du téléchargement/redimensionnement de l\'emoji:', data.message);
                         reject(new Error(data.message));
                     }
                 })
-                .catch(err => reject(err));
+                .catch(err => {
+                    // console.log('Erreur lors de la requête fetch:', err);
+                    reject(err);
+                });
             });
         }
 
-        function addMessage(timestamp, username, originalText, processedText) {
+
+
+        function addMessage(timestamp, username, processedText, avatar, badges, is_gift) {
             const chatPanel = document.getElementById('chat-panel');
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message');
-            messageDiv.setAttribute('data-original-text', originalText);
+            const fixedHeaderDiv = document.getElementById('fixed-header');
+            const lastMessageDiv = chatPanel.lastElementChild;
+            let messageDiv;
+            let shouldCreateHeader = true;
 
-            const timestampSpan = document.createElement('span');
-            timestampSpan.classList.add('timestamp');
-            timestampSpan.textContent = timestamp + ' ';
+            // console.log(' ___________ timestamp :', timestamp);
+            // console.log(' ___________ username :', username);
+            // console.log(' ___________ processedText :', processedText);
+            // console.log(' ___________ avatar :', avatar);
+            // console.log(' ___________ badges :', badges);
+            // console.log(' ___________ is_gift :', is_gift);
 
-            const usernameSpan = document.createElement('span');
-            usernameSpan.classList.add('username');
-            usernameSpan.textContent = username + ': ';
-            usernameSpan.style.color = getColorForUser(username);
+            if (lastMessageDiv) {
+                const lastUsernameSpan = lastMessageDiv.querySelector('.username');
+                const lastTimestampSpan = lastMessageDiv.querySelector('.timestamp');
+
+                if (lastUsernameSpan && lastUsernameSpan.textContent === username && lastTimestampSpan) {
+                    const lastTimestamp = lastTimestampSpan.textContent.trim();
+                    const lastTimeParts = lastTimestamp.split(':');
+                    const currentTimeParts = timestamp ? timestamp.split(':') : null;
+
+                    if (currentTimeParts) {
+                        const lastTime = new Date();
+                        lastTime.setHours(parseInt(lastTimeParts[0], 10));
+                        lastTime.setMinutes(parseInt(lastTimeParts[1], 10));
+
+                        const currentTime = new Date();
+                        currentTime.setHours(parseInt(currentTimeParts[0], 10));
+                        currentTime.setMinutes(parseInt(currentTimeParts[1], 10));
+
+                        const timeDifference = (currentTime - lastTime) / (1000 * 60); // différence en minutes
+
+                        if (timeDifference <= 5) {
+                            messageDiv = lastMessageDiv;
+                            shouldCreateHeader = false;
+                        }
+                    }
+                }
+            }
+
+            if (shouldCreateHeader) {
+                messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+
+                if (is_gift) {
+                    messageDiv.classList.add('gift');
+                }
+                
+                messageDiv.setAttribute('data-username', username);
+
+                const headerSpan = document.createElement('span');
+                headerSpan.classList.add('header');
+
+                const usernameSpan = document.createElement('span');
+                usernameSpan.classList.add('username');
+                usernameSpan.textContent = username ? `${username}` : '';
+                if (is_gift) {
+                    usernameSpan.style.color = 'black';
+                } else {
+                    usernameSpan.style.color = getColorForUser(username);
+                }
+                usernameSpan.style.paddingLeft = '5px';
+                usernameSpan.style.paddingRight = '5px';
+
+                if (avatar) {
+                    const avatarDiv = document.createElement('div');
+                    avatarDiv.classList.add('avatar-inner');
+                    avatarDiv.style.display = 'inline-block';
+                    avatarDiv.style.verticalAlign = 'middle';
+
+                    const avatarImg = document.createElement('img');
+                    avatarImg.src = avatar;
+                    avatarImg.classList.add('avatar-img');
+                    avatarImg.style.width = '100%';
+                    avatarImg.style.height = '100%';
+
+                    avatarDiv.appendChild(avatarImg);
+                    headerSpan.appendChild(avatarDiv);
+                }
+
+                headerSpan.appendChild(usernameSpan);
+
+                if (badges && badges.length > 0) {
+                    badges.forEach(badge => {
+                        const badgeImg = document.createElement('img');
+                        badgeImg.src = badge;
+                        badgeImg.style.verticalAlign = 'middle';
+                        badgeImg.style.transform = 'translateY(-1px)';
+                        headerSpan.appendChild(badgeImg);
+                    });
+                }
+
+                if (timestamp !== null) {
+                    const timestampSpan = document.createElement('span');
+                    timestampSpan.classList.add('timestamp');
+                    timestampSpan.textContent = timestamp ? `${timestamp}` : '';
+                    headerSpan.appendChild(timestampSpan);
+                }
+
+                messageDiv.appendChild(headerSpan);
+
+                chatPanel.appendChild(messageDiv);
+            }
+
+            const messageContentDiv = document.createElement('div');
+            messageContentDiv.classList.add('message-content');
+            messageContentDiv.setAttribute('data-original-text', processedText);
 
             const textSpan = document.createElement('span');
             textSpan.classList.add('text');
             textSpan.innerHTML = processedText;
 
-            messageDiv.appendChild(timestampSpan);
-            messageDiv.appendChild(usernameSpan);
-            messageDiv.appendChild(textSpan);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = processedText;
+            const images = tempDiv.getElementsByTagName('img');
+            const textContent = tempDiv.textContent.trim();
 
-            chatPanel.appendChild(messageDiv);
-            chatPanel.scrollTop = chatPanel.scrollHeight;
+            if (images.length === 1 && textContent === '') {
+                const img = textSpan.querySelector('img');
+                img.style.display = 'block';
+                img.style.marginLeft = 'auto';
+                img.style.marginRight = 'auto';
+            }
 
-            console.log('Message added: ', { timestamp, username, processedText });
+            messageContentDiv.appendChild(textSpan);
+            messageDiv.appendChild(messageContentDiv);
+
+            // Remove the oldest message if there are more than 30 messages
+            const allMessages = chatPanel.getElementsByClassName('message');
+            if (allMessages.length > 20) {
+                chatPanel.removeChild(allMessages[0]);
+                // console.warn("allMessages lenght after clear (max 20) :", allMessages.length)
+            }
+
+            const loadPromises = [];
+
+            messageDiv.querySelectorAll('img').forEach(img => {
+                loadPromises.push(new Promise(resolve => {
+                    if (img.complete) {
+                        resolve();
+                    } else {
+                        img.onload = () => resolve();
+                        img.onerror = () => resolve();
+                    }
+                }));
+            });
+
+            Promise.all(loadPromises).then(() => {
+                chatPanel.scrollTop = chatPanel.scrollHeight;
+                // console.log('All images loaded or failed to load.');
+            });
+
+            function checkAndFixHeader() {
+                const messages = document.getElementsByClassName('message');
+                let found = false;
+                const tolerance = 35;
+                const fixedHeaderContainer = document.getElementById('fixed-header-container');
+                const fixedHeaderDiv = document.getElementById('fixed-header');
+                const chatPanelRect = document.getElementById('chat-panel').getBoundingClientRect();
+
+                // console.log('INFO: Checking fixed header visibility...');
+                // console.log('INFO: fixedHeaderContainer.style.display:', fixedHeaderContainer.style.display);
+
+                for (let i = 0; i < messages.length; i++) {
+                    const rect = messages[i].getBoundingClientRect();
+                    // console.log(`INFO: Message ${i} rect:`, rect);
+                    // console.log('INFO: chatPanelRect:', chatPanelRect);
+
+                    // Vérifier si le message est partiellement masqué par le haut du panneau de chat avec une tolérance de 35px
+                    if (rect.top < chatPanelRect.top - tolerance && rect.bottom > chatPanelRect.top + tolerance) {
+                        // console.log(`INFO: Message ${i} is partially hidden by the top. Setting fixed header.`);
+                        fixedHeaderDiv.innerHTML = '';
+
+                        const usernameSpan = messages[i].querySelector('.username').cloneNode(true);
+                        const timestampSpan = messages[i].querySelector('.timestamp').cloneNode(true);
+
+                        const containerDiv = document.createElement('div');
+                        containerDiv.style.display = 'flex';
+                        containerDiv.style.justifyContent = 'center';
+                        containerDiv.style.alignItems = 'center';
+
+                        containerDiv.appendChild(usernameSpan);
+                        containerDiv.appendChild(timestampSpan);
+
+                        fixedHeaderDiv.appendChild(containerDiv);
+
+                        fixedHeaderContainer.style.display = 'block';
+                        found = true;
+                        break;
+                    } else {
+                        // console.log(`INFO: Message ${i} is fully visible or not hidden enough. No need for fixed header.`);
+                    }
+                }
+                if (!found) {
+                    // console.log('INFO: No messages need fixed header. Hiding fixed header.');
+                    fixedHeaderContainer.style.display = 'none';
+                }
+            }
+
+            // Appeler checkAndFixHeader après avoir ajouté le message
+            document.getElementById('chat-panel').addEventListener('scroll', checkAndFixHeader);
+            checkAndFixHeader();
+
+
+
+
+
+
+            // console.log('Message added: ', { avatar, badges, timestamp, username, processedText });
+
+            // Ajouter la logique d'animation spéciale pour les cadeaux
+            if (is_gift) {
+                console.error('THIS IS A GIFT :');
+                const giftType = extractGiftTypeFromText(processedText.toLowerCase());
+                console.error(giftType);
+                if (giftType === 'lemon') {
+                    messageDiv.classList.add('lemon');
+                } else if (giftType === 'icecream') {
+                    messageDiv.classList.add('icecream');
+                } else if (giftType === 'diamond') {
+                    messageDiv.classList.add('diamond');
+                } else if (giftType === 'ninjaghini') {
+                    messageDiv.classList.add('ninjaghini');
+                } else if (giftType === 'ninjet') {
+                    messageDiv.classList.add('ninjet');
+                }
+            }
         }
 
-        function deleteMessage(messageText) {
+
+
+
+
+
+
+
+        async function deleteMessage(pseudo, content, is_gift) {
+            // Convertir les liens emoji en chemins locaux
+            content = await convertEmojiLinks(content);
+            // console.log('CONTENT TO SUPPRESS: ', content);
+
             const chatPanel = document.getElementById('chat-panel');
             const messageDivs = chatPanel.getElementsByClassName('message');
             const messagesToDelete = [];
 
+            const stripHTML = (html) => {
+                const div = document.createElement('div');
+                div.innerHTML = html;
+                const images = div.getElementsByTagName('img');
+                let text = div.textContent || div.innerText || "";
+                
+                // Append img tags as is
+                for (let i = 0; i < images.length; i++) {
+                    text += images[i].outerHTML;
+                }
+                return text;
+            };
+
             for (let i = 0; i < messageDivs.length; i++) {
                 const messageDiv = messageDivs[i];
-                const originalText = messageDiv.getAttribute('data-original-text');
+                const messageContentDivs = messageDiv.getElementsByClassName('message-content');
+                const messageContentDivsToDelete = [];
 
-                if (originalText === messageText) {
+                for (let j = 0; j < messageContentDivs.length; j++) {
+                    const messageContentDiv = messageContentDivs[j];
+                    const originalText = stripHTML(messageContentDiv.getAttribute('data-original-text'));
+                    // console.warn('Comparing Content :', originalText);
+
+                    if (originalText === content) {
+                        messageContentDivsToDelete.push(messageContentDiv);
+                    }
+                }
+
+                if (messageContentDivsToDelete.length === messageContentDivs.length) {
                     messagesToDelete.push(messageDiv);
+                } else {
+                    messageContentDivsToDelete.forEach(messageContentDiv => {
+                        messageContentDiv.classList.add('removing');
+                        setTimeout(() => {
+                            messageContentDiv.parentElement.removeChild(messageContentDiv);
+                            // console.log('Message deleted IS GIFT ?  : ', is_gift);
+                            // console.log('Message deleted: ', content);
+                        }, 500);
+                    });
                 }
             }
 
@@ -248,10 +865,14 @@
                 messageDiv.classList.add('removing');
                 setTimeout(() => {
                     chatPanel.removeChild(messageDiv);
-                    console.log('Message deleted: ', messageText);
+                    // console.log('MessageDiv deleted IS GIFT ?  : ', is_gift);
+                    // console.log('MessageDiv deleted: ', content);
                 }, 500);
             });
         }
+
+
+
 
     </script>
 </body>
