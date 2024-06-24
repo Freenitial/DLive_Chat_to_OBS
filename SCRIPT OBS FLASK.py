@@ -10,23 +10,28 @@ import random
 import tkinter as tk
 from tkinter import ttk
 
-retry = 0
+import tempfile
 
+retry = 0
 def install_required_packages():
     try:
         print("Attempting to install/upgrade packages...")
-        command = [sys.executable, '-m', 'pip', 'install', '--upgrade',
-                   'selenium', 'obs-websocket-py', 'flask', 'flask-cors', 
-                   'flask-socketio', 'pillow', 'requests', 'colorama', 'CairoSVG']
-        subprocess.check_call(['runas', '/user:Administrator'] + command)
+        command = 'python -m pip install --upgrade selenium obs-websocket-py flask flask-cors flask-socketio pillow requests colorama pymupdf svglib; pause'
+        powershell_command = f"Start-Process -FilePath 'powershell.exe' -ArgumentList '-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', \"{command}\" -Wait -Verb RunAs"
+        
+        # Print the command for verification
+        print("Final PowerShell command:", powershell_command)
+        
+        subprocess.run(["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", powershell_command], check=True)
         print("All packages installed/upgraded successfully.")
     except subprocess.CalledProcessError as e:
         print(f"An error occurred while trying to install packages: {e}")
 
+
 def try_import():
     global retry
-    if retry > 1 : 
-        print("\n\n   Wrong PIP environnment.\n")
+    if retry > 1:
+        print("\n\n   Wrong PIP environment.\n")
         time.sleep(4)
         sys.exit()
     try:
@@ -46,9 +51,11 @@ def try_import():
         import colorama
         from colorama import Fore, Style
         import requests
-        import cairosvg
+        import fitz
+        from svglib.svglib import svg2rlg
+        from reportlab.graphics import renderPDF
         print("All modules imported successfully.")
-    except ImportError as e:
+    except Exception as e:
         retry += 1
         print(f"ImportError occurred: {e}")
         print("Attempting to install the required packages...")
@@ -56,9 +63,7 @@ def try_import():
         # Retry imports after installation
         try_import()
 
-# Initial attempt to import
 try_import()
-#from bs4 import BeautifulSoup
 
 
 from flask import Flask, request, send_from_directory, jsonify, render_template
@@ -77,8 +82,9 @@ from io import BytesIO
 import colorama
 from colorama import Fore, Style
 import requests
-import cairosvg
-
+import fitz
+from svglib.svglib import svg2rlg
+from reportlab.graphics import renderPDF
 
 local_app_data = os.environ.get("LOCALAPPDATA")
 settings_ini_path = os.path.join(local_app_data, 'OBS_module_chat', 'config.ini')
@@ -859,10 +865,26 @@ class Scrapper:
                     try:
                         # Convertir SVG en PNG
                         print("Conversion de SVG en PNG")
+                        
+                        # Écrire le contenu SVG dans un fichier temporaire
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=".svg") as tmp_svg:
+                            tmp_svg.write(response.content)
+                            tmp_svg_path = tmp_svg.name
+                        
+                        # Convertir SVG en PDF en mémoire avec svglib et reportlab
+                        drawing = svg2rlg(tmp_svg_path)
+                        
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
+                            renderPDF.drawToFile(drawing, tmp_pdf.name)
+                            tmp_pdf_path = tmp_pdf.name
+                        
+                        # Ouvrir le PDF avec fitz (pyMuPdf) pour convertir en PNG
+                        doc = fitz.open(tmp_pdf_path)
+                        pix = doc.load_page(0).get_pixmap(alpha=True, dpi=300)
+                        
                         png_output = BytesIO()
-                        cairosvg.svg2png(bytestring=response.content, write_to=png_output, background_color='none')  # Conserver la transparence
-                        print("SVG converti en PNG avec succès")
-
+                        png_output.write(pix.tobytes("png"))
+                        
                         png_output.seek(0)  # Assurez-vous de revenir au début de l'objet BytesIO
                         image = Image.open(png_output)
                         emoji_extension = f".png"
