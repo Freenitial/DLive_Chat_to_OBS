@@ -9,6 +9,7 @@ from threading import Thread
 import random
 import tkinter as tk
 from tkinter import ttk
+import queue
 
 import tempfile
 
@@ -86,22 +87,22 @@ import fitz
 from svglib.svglib import svg2rlg
 from reportlab.graphics import renderPDF
 
-local_app_data = os.environ.get("LOCALAPPDATA")
-settings_ini_path = os.path.join(local_app_data, 'OBS_module_chat', 'config.ini')
+working_folder = os.path.join(os.environ.get("LOCALAPPDATA"), 'OBS_module_chat')
+settings_ini_path = os.path.join(working_folder, 'config.ini')
 
 colorama.init()
 
-
+config_request_queue = queue.Queue()
 
 
 OBS_HOST, OBS_PORT, OBS_PASSWORD = None, None, None
 FLASK_PORT, CHAT_URL = None, None
 SHOW_AVATAR, SHOW_BADGES, DEBUG = None, None, None
 
-
+# Using sample default_values directly for clarity in the example
 default_values = {
-    'OBS': {'HOST': 'localhost', 'PORT': str(random.randint(1024, 65535)), 'PASSWORD': ''},
-    'FLASK': {'PORT': str(random.randint(5000, 8100))},
+    'OBS': {'HOST': 'localhost', 'PORT': 4444, 'PASSWORD': 'secret'},
+    'FLASK': {'PORT': str(random.randint(5111, 8099))},
     'CHAT': {'URL': 'https://dlive.tv/c/COMPLETE_HERE/COMPLETE+HERE'},
     'DISPLAY': {'SHOW_AVATAR': 'True', 'SHOW_BADGES': 'True'},
     'MISC': {'DEBUG': 'False'}
@@ -115,7 +116,7 @@ def create_default_config():
         config.write(configfile)
     print(f"Default config created at {settings_ini_path}")
 
-def read_config():
+def read_config(forced=False):
     global OBS_HOST, OBS_PORT, OBS_PASSWORD, FLASK_PORT, CHAT_URL, SHOW_AVATAR, SHOW_BADGES, DEBUG
     config = configparser.ConfigParser()
     config.read(settings_ini_path, encoding='utf-8')
@@ -158,27 +159,27 @@ def read_config():
 
     print(f"OBS_HOST: {OBS_HOST}, OBS_PORT: {OBS_PORT}, OBS_PASSWORD: {OBS_PASSWORD}, FLASK_PORT: {FLASK_PORT}, CHAT_URL: {CHAT_URL}, SHOW_AVATAR: {SHOW_AVATAR}, SHOW_BADGES: {SHOW_BADGES}, DEBUG: {DEBUG}")
 
-    if missing_values:
+    if missing_values or forced:
         verify_config_window(config)
 
 def verify_config_window(config):
     def on_confirm():
         global OBS_HOST, OBS_PORT, OBS_PASSWORD, FLASK_PORT, CHAT_URL, SHOW_AVATAR, SHOW_BADGES, DEBUG
+        
         OBS_HOST = entries['OBS_HOST'].get()
         OBS_PORT = int(entries['OBS_PORT'].get())
         OBS_PASSWORD = entries['OBS_PASSWORD'].get()
         FLASK_PORT = int(entries['FLASK_PORT'].get())
         CHAT_URL = entries['CHAT_URL'].get()
-        SHOW_AVATAR = entries['DISPLAY_SHOW_AVATAR'].get() == '1'
-        SHOW_BADGES = entries['DISPLAY_SHOW_BADGES'].get() == '1'
-        DEBUG = entries['MISC_DEBUG'].get() == '1'
+        SHOW_AVATAR = entries['DISPLAY_SHOW_AVATAR'].get()
+        SHOW_BADGES = entries['DISPLAY_SHOW_BADGES'].get()
+        DEBUG = entries['MISC_DEBUG'].get()
 
-        update_config_file()  # Appeler cette fonction pour mettre à jour le fichier
+        update_config_file()
 
-        root.destroy()  # Utiliser root.destroy() pour fermer correctement la fenêtre
+        root.destroy()
 
     def update_config_file():
-        config = configparser.ConfigParser()
         config['OBS'] = {
             'HOST': OBS_HOST,
             'PORT': str(OBS_PORT),
@@ -207,9 +208,9 @@ def verify_config_window(config):
         confirm_button.config(state=tk.NORMAL if all_filled else tk.DISABLED)
 
     root = tk.Tk()
-    root.title("Vérifiez la configuration")
+    root.title("Verify Configuration")
 
-    # Fonction pour rediriger la fermeture de la fenêtre à l'annulation
+    # Handle window closing
     def on_closing():
         root.quit()
         root.destroy()
@@ -217,7 +218,6 @@ def verify_config_window(config):
 
     root.protocol("WM_DELETE_WINDOW", on_closing)
 
-    # Configurer les styles pour les boutons
     style = ttk.Style()
     style.configure('TButton', font=('Helvetica', 14, 'bold'))
 
@@ -247,19 +247,17 @@ def verify_config_window(config):
     button_frame = ttk.Frame(root)
     button_frame.pack(fill="x", padx=10, pady=10)
 
-    cancel_button = ttk.Button(button_frame, text="Annuler et Quitter", command=on_closing)
+    cancel_button = ttk.Button(button_frame, text="Cancel and Quit", command=on_closing)
     cancel_button.pack(side="left", padx=5, pady=5)
 
-    confirm_button = ttk.Button(button_frame, text="Confirmer", command=on_confirm, state=tk.DISABLED)
+    confirm_button = ttk.Button(button_frame, text="Confirm", command=on_confirm, state=tk.DISABLED)
     confirm_button.pack(side="right", padx=5, pady=5)
 
     check_entries()
 
-    # Ajuster la taille de la fenêtre pour qu'elle s'adapte au contenu
     root.update_idletasks()
     root.minsize(root.winfo_width(), root.winfo_height())
 
-    # Centrer la fenêtre sur l'écran
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
     position_top = int(screen_height / 2 - root.winfo_height() / 2)
@@ -275,10 +273,6 @@ read_config()
 
 
 
-
-
-
-
 ws = obsws(OBS_HOST, OBS_PORT, OBS_PASSWORD)
 obs_chat_name=None
 source_found = False
@@ -288,8 +282,8 @@ def connect_ws():
         if not ws.ws or not ws.ws.connected:
             ws.connect()
     except ConnectionFailure as e:
-        print(Fore.RED + f"Erreur de connexion : {e}" + Style.RESET_ALL)
-        show_error_image("ACTIVEZ WEBSOCKET DANS OBS COMME CECI\nParamètre absent ? Relancez OBS")
+        print(Fore.RED + f"Connection error : {e}" + Style.RESET_ALL)
+        show_error_image("ACTIVATE WEBSOCKET IN OBS LIKE THIS\nYou should restart OBS if setting not found")
         raise e
 
 def disconnect_ws():
@@ -297,33 +291,41 @@ def disconnect_ws():
         try:
             ws.disconnect()
         except ConnectionFailure as e:
-            print(Fore.RED + f"Erreur de déconnexion : {e}" + Style.RESET_ALL)
+            print(Fore.RED + f"Disconnect error : {e}" + Style.RESET_ALL)
 
 def get_active_scene_name():
     try:
         scene_list = ws.call(obs_request.GetSceneList())
         active_scene_name = scene_list.getCurrentScene()
-        print("Scène active :", active_scene_name)
+        print("Active scene :", active_scene_name)
         return active_scene_name
     except Exception as e:
-        show_error_image("ACTIVEZ WEBSOCKET DANS OBS COMME CECI\nParamètre absent ? Relancez OBS")
+        show_error_image("ACTIVATE WEBSOCKET IN OBS LIKE THIS\nYou should restart OBS if setting not found")
         raise e
 
 def show_error_image(message):
     def retry():
         error_dialog.destroy()
+        root.destroy()
         subprocess.Popen([sys.executable] + sys.argv)
 
     root = tk.Tk()
     root.withdraw()
     error_dialog = tk.Toplevel(root)
     error_dialog.configure(bg='#2E3B4E')
-    error_dialog.title("Erreur")
+    error_dialog.title("Error")
 
     f2 = ('Arial', 18, 'bold')
     tk.Label(error_dialog, text=message, bg='#2E3B4E', fg='#FFD700', font=f2, wraplength=660).pack(pady=20, padx=20)
 
-    image_path = os.path.join(local_app_data, 'OBS_module_chat', 'tuto.png')
+    config_text = (
+        "It need to match with your actual config.ini :\n"
+        f"Server port : {OBS_PORT}\n"
+        f"Password : {OBS_PASSWORD}"
+    )
+    tk.Label(error_dialog, text=config_text, bg='#2E3B4E', fg='#FFD700', font=f2, wraplength=660).pack(pady=20, padx=20)
+
+    image_path = os.path.join(working_folder, 'tuto.png')
     image = Image.open(image_path)
     photo = ImageTk.PhotoImage(image)
 
@@ -331,8 +333,9 @@ def show_error_image(message):
     img_label.image = photo
     img_label.pack(pady=10)
 
-    tk.Button(error_dialog, text="Réessayer", command=retry, bg='#4682B4', fg='white', font=('Arial', 24, 'bold')).pack(pady=20)
+    tk.Button(error_dialog, text="RETRY", command=retry, bg='#4682B4', fg='white', font=('Arial', 24, 'bold')).pack(pady=20)
     error_dialog.mainloop()
+
 
 
 
@@ -348,7 +351,7 @@ def check_chat_obs():
             #print(f"Réponse de GetSourceSettings pour {source['sourceName']} : {source_settings_response.datain}")  # Impression pour débogage
             source_settings = source_settings_response.getSourceSettings()
             if source_settings.get('url', '').startswith(f'http://localhost:{FLASK_PORT}/chat'):
-                print(Fore.GREEN + f"Source flux chat trouvée : {source['sourceName']}" + Fore.RESET)
+                print(Fore.GREEN + f"Livechat source found : {source['sourceName']}" + Fore.RESET)
                 obs_chat_name = source['sourceName']
                 return True
     return False
@@ -365,14 +368,14 @@ def show_dialog(root):
     dialog.geometry("700x550")
 
     f = ('Arial', 24, 'bold')
-    tk.Label(dialog, text="LA SOURCE NAVIGATEUR DU CHAT N'A PAS ETE TROUVEE DANS LA SCENE ACTUELLE OBS",
+    tk.Label(dialog, text="BROWSER SOURCE FOR LIVECHAT NOT FOUND IN OBS",
              bg='#2E3B4E', fg='#FFD700', font=f, wraplength=660).pack(pady=20, padx=20)
 
     url_frame = tk.Frame(dialog, bg='#2E3B4E')
     url_frame.pack(pady=5, padx=20)
     url_label = tk.Label(url_frame, text=f"http://localhost:{FLASK_PORT}/chat", bg='#2E3B4E', fg='white', font=f)
     url_label.pack(side='left')
-    url_button = tk.Button(url_frame, text="Copier", command=lambda: copy_to_clipboard(f"http://localhost:{FLASK_PORT}/chat", root),
+    url_button = tk.Button(url_frame, text="COPY", command=lambda: copy_to_clipboard(f"http://localhost:{FLASK_PORT}/chat", root),
                            bg='#4682B4', fg='white', font=('Arial', 12, 'bold'))
     url_button.pack(side='left', padx=10)
 
@@ -380,7 +383,7 @@ def show_dialog(root):
     height_frame.pack(pady=5, padx=20)
     height_label = tk.Label(height_frame, text="Largeur: 370", bg='#2E3B4E', fg='white', font=f)
     height_label.pack(side='left')
-    height_button = tk.Button(height_frame, text="Copier", command=lambda: copy_to_clipboard("370", root),
+    height_button = tk.Button(height_frame, text="COPY", command=lambda: copy_to_clipboard("370", root),
                               bg='#4682B4', fg='white', font=('Arial', 12, 'bold'))
     height_button.pack(side='left', padx=10)
 
@@ -388,7 +391,7 @@ def show_dialog(root):
     width_frame.pack(pady=5, padx=20)
     width_label = tk.Label(width_frame, text="Hauteur: 700", bg='#2E3B4E', fg='white', font=f)
     width_label.pack(side='left')
-    width_button = tk.Button(width_frame, text="Copier", command=lambda: copy_to_clipboard("700", root),
+    width_button = tk.Button(width_frame, text="COPY", command=lambda: copy_to_clipboard("700", root),
                              bg='#4682B4', fg='white', font=('Arial', 12, 'bold'))
     width_button.pack(side='left', padx=10)
 
@@ -442,14 +445,17 @@ def main_loop():
     try:
         connect_ws()
         if not check_chat_obs():
+            
             show_dialog(root)
     except Exception as e:
         show_error_image("ACTIVEZ WEBSOCKET DANS OBS COMME CECI\nParamètre absent ? Relancez OBS")
     root.quit()
 
 # Démarrage de la boucle de vérification
+
 connect_ws()
 try:
+    
     main_loop()
 finally:
     disconnect_ws()
@@ -643,133 +649,9 @@ class Scrapper:
 
 
     def _inject_observer_script(self, driver):
-        observer_script = """
-        (function() {{
-            const logLevels = ['log', 'warn', 'error'];
-            logLevels.forEach(level => {{
-                const original = console[level];
-                console[level] = function(...args) {{
-                    original.apply(console, args);
-                    fetch('http://localhost:{FLASK_PORT}/console_log', {{
-                        method: 'POST',
-                        headers: {{ 'Content-Type': 'application/json' }},
-                        body: JSON.stringify({{ level, message: args }})
-                    }}).catch(error => original('Failed to send log:', error));
-                }};
-            }});
-            const targetNode = document.querySelector('div.chatbody');
-            if (!targetNode) {{
-                console.error('No targetNode found.');
-                return;
-            }}
-            console.log('Observing targetNode:', targetNode);
-            const config = {{ childList: true, subtree: true, characterData: true, characterDataOldValue: true }};
-            const extractMessageText = (node) => {{
-                let messageText = '';
-                node.childNodes.forEach(child => {{
-                    if (child.nodeType === Node.TEXT_NODE) {{
-                        messageText += child.textContent.replace(/\\s+/g, ' ');
-                    }} else if (child.nodeType === Node.ELEMENT_NODE) {{
-                        if (child.tagName === 'IMG') {{
-                            let imgSrc = child.currentSrc || child.getAttribute('src');
-                            if (imgSrc) {{
-                                if (!imgSrc.startsWith('http')) {{
-                                    imgSrc = `https://dlive.tv${{imgSrc}}`;
-                                }}
-                                messageText += ` :::${{imgSrc}}::: `;
-                            }}
-                        }} else {{
-                            messageText += extractMessageText(child);
-                        }}
-                    }}
-                }});
-                return messageText;
-            }};
-            const generateUniqueId = (index, text) => `${{index}}-${{text.trim().replace(/\\s+/g, '£££')}}`;
-            const getCurrentDivIds = () => {{
-                return Array.from(targetNode.querySelectorAll('div')).map((div, index) => generateUniqueId(index, extractMessageText(div)));
-            }};
-            let previousDivIds = getCurrentDivIds();
-            const containsGiftEmoji = (node) => {{
-                if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('gift-emoji')) {{
-                    return true;
-                }}
-                return Array.from(node.childNodes).some(child => containsGiftEmoji(child));
-            }};
-            const handleMessage = (nodes, isAdded, ignoreNewMessages) => {{
-                if (ignoreNewMessages && isAdded) {{
-                    return;
-                }}
-                for (const node of nodes) {{
-                    if (node.nodeType === 1) {{ // Element nodes only
-                        const messageText = extractMessageText(node).trim();
-                        const parent = node.parentNode;
-                        if (parent) {{
-                            const uniqueId = generateUniqueId(Array.from(parent.children).indexOf(node), messageText);
-                            const isGift = containsGiftEmoji(node);
-                            if (isAdded) {{
-                                console.log('New message detected:', messageText, 'Is gift:', isGift);
-                                fetch('http://localhost:{FLASK_PORT}/new_message', {{
-                                    method: 'POST',
-                                    headers: {{ 'Content-Type': 'application/json' }},
-                                    body: JSON.stringify({{ message: messageText, is_gift: isGift }})
-                                }}).then(response => response.text())
-                                .then(data => console.log('Response from server (new_message):', data))
-                                .catch(error => console.error('Error:', error));
-                            }}
-                        }}
-                    }}
-                }}
-            }};
-            const callback = (mutationsList) => {{
-                console.error('\\n\\n******************************************************\\n\\n');
-                const currentDivIds = getCurrentDivIds();
-                // Variable pour suivre si une suppression a été détectée
-                let deletionDetected = false;
-                let removedText = null;
-                let isGift = null;
-                // Détection du premier message supprimé uniquement
-                const removedId = previousDivIds.find(id => !currentDivIds.includes(id));
-                if (removedId) {{
-                    removedText = removedId.substring(removedId.indexOf('-') + 1).replace(/£££/g, ' ').replace(/\\s+/g, ' ').trim();
-                    isGift = removedText.includes(":::https://dlive.tv/img/gift_");
-                    console.log(' isGift  in  JS:', isGift);
-                    if (!isGift) {{
-                        console.log('Message removed:', removedText);
-                        deletionDetected = true;
-                        fetch('http://localhost:{FLASK_PORT}/remove_message', {{
-                            method: 'POST',
-                            headers: {{ 'Content-Type': 'application/json' }},
-                            body: JSON.stringify({{ message: removedText, is_gift: isGift }})
-                        }}).then(response => response.text())
-                        .then(data => console.log('Response from server (remove_message):', data))
-                        .catch(error => console.error('Error:', error));
-                    }} else {{
-                        console.log('Mutation detected type GIFT. Mostly an increased GIFT');
-                        fetch('http://localhost:{FLASK_PORT}/upgrade_gift', {{
-                            method: 'POST',
-                            headers: {{ 'Content-Type': 'application/json' }},
-                            body: JSON.stringify({{ old_message: removedText }})
-                        }}).then(response => response.text())
-                        .then(data => console.log('Response from server (new_message):', data))
-                        .catch(error => console.error('Error:', error));
-                    }}
-                }} else {{
-                    for (const mutation of mutationsList) {{
-                        if (mutation.type === 'childList') {{
-                            console.log('Mutation detected type : childList');
-                            handleMessage(mutation.addedNodes, true, deletionDetected);
-                            break;
-                        }}
-                    }}
-                }}
-                previousDivIds = getCurrentDivIds();
-            }};
-            const observer = new MutationObserver(callback);
-            observer.observe(targetNode, config);
-            console.log('MutationObserver attached and observing:', targetNode);
-        }})();
-        """.format(FLASK_PORT=FLASK_PORT)
+        script_path = os.path.join(working_folder, 'observer_script.js')
+        with open(script_path, 'r') as file:
+            observer_script = file.read().format(FLASK_PORT=FLASK_PORT)
         driver.execute_script(observer_script)
 
 
@@ -861,30 +743,21 @@ class Scrapper:
             
             response = requests.get(emoji_link)
             if response.status_code == 200:
+
                 if emoji_extension == '.svg':
                     try:
-                        # Convertir SVG en PNG
                         print("Conversion de SVG en PNG")
-                        
-                        # Écrire le contenu SVG dans un fichier temporaire
                         with tempfile.NamedTemporaryFile(delete=False, suffix=".svg") as tmp_svg:
                             tmp_svg.write(response.content)
                             tmp_svg_path = tmp_svg.name
-                        
-                        # Convertir SVG en PDF en mémoire avec svglib et reportlab
                         drawing = svg2rlg(tmp_svg_path)
-                        
                         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
                             renderPDF.drawToFile(drawing, tmp_pdf.name)
                             tmp_pdf_path = tmp_pdf.name
-                        
-                        # Ouvrir le PDF avec fitz (pyMuPdf) pour convertir en PNG
                         doc = fitz.open(tmp_pdf_path)
                         pix = doc.load_page(0).get_pixmap(alpha=True, dpi=300)
-                        
                         png_output = BytesIO()
                         png_output.write(pix.tobytes("png"))
-                        
                         png_output.seek(0)  # Assurez-vous de revenir au début de l'objet BytesIO
                         image = Image.open(png_output)
                         emoji_extension = f".png"
@@ -892,6 +765,7 @@ class Scrapper:
                     except Exception as e:
                         print("Erreur lors de la conversion SVG en PNG : ", e)
                         return jsonify({'status': 'error', 'message': 'Failed to convert SVG to PNG'}), 500
+                    
                 elif emoji_extension == '.gif':
                     # Si l'extension est .gif, nous voulons simplement sauvegarder le fichier tel quel sans modification
                     path = os.path.join(EMOJI_FOLDER, f'{emoji_name}{emoji_extension}')
@@ -913,7 +787,6 @@ class Scrapper:
                     except Exception as e:
                         print("Erreur lors de l'ouverture de l'image : ", e)
                         return jsonify({'status': 'error', 'message': 'Failed to open image'}), 500
-
                 
                 if not is_avatar and emoji_extension != '.gif':
                     try:
@@ -1029,9 +902,8 @@ class Scrapper:
         def chat():
             return send_from_directory('.', 'chat_panel.html')
 
-        @app.route('/messages')
-        def messages():
-            return jsonify(self.message_manager.get_messages())
+
+
 
         flask_thread = Thread(target=socketio.run, args=(app,), kwargs={'port': FLASK_PORT, 'debug': True, 'use_reloader': False})
 
@@ -1049,25 +921,79 @@ class Scrapper:
         test_response = requests.post(f'http://localhost:{FLASK_PORT}/new_message', json={'message': 'Test message'})
         print(f"Test response from Flask: {test_response.text}")
 
+        main_thread()
 
 
 
 
-        try:
-            while True:
-                self.event_manager.process_queue()
-                #self.process_manual_div()
-                time.sleep(10)
-        except KeyboardInterrupt:
-            print("Script interrompu par l'utilisateur.")
-        finally:
-            self.driver.quit()
 
+def read_config_non_blocking():
+    config_request_queue.put(True)  # Place la requête dans la queue
+
+
+
+def tkinter_window():
+    root = tk.Tk()
+    root.title("Control Panel")
+
+    btn1 = tk.Button(root, text="Button 1 - Config", command=read_config_non_blocking)
+    btn1.pack(pady=10)
+
+    btn2 = tk.Button(root, text="Button 2")
+    btn2.pack(pady=10)
+
+    btn3 = tk.Button(root, text="Button 3")
+    btn3.pack(pady=10)
+
+    root.mainloop()
 
 
 app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app)
 
-notifier = Scrapper(socketio)
-notifier.run()
+# Définir et initialiser notifier
+notifier = None
+
+def main_thread():
+    global notifier
+    root = tk.Tk()
+    root.withdraw()  # Masquer la fenêtre principale
+
+    # Démarrer la fenêtre tkinter dans un thread séparé
+    #tkinter_thread = Thread(target=tkinter_window)
+    #tkinter_thread.start()
+
+    try:
+        while True:
+            if notifier:
+                notifier.event_manager.process_queue()
+                try:
+                    # Vérifie si une requête de configuration est dans la queue
+                    if not config_request_queue.empty():
+                        config_request_queue.get_nowait()
+                        read_config(forced=True)
+                except queue.Empty:
+                    pass
+            
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        print("Script interrompu par l'utilisateur.")
+    finally:
+        if notifier:
+            notifier.driver.quit()
+        root.quit()
+
+
+
+
+if __name__ == "__main__":
+    # Initialiser notifier ici avant de démarrer main_thread
+    notifier = Scrapper(socketio)
+    notifier.run()
+
+    # Lancer main_thread dans un thread séparé pour ne pas bloquer l'exécution de Flask
+    Thread(target=main_thread).start()
+
+    # Démarrer l'application Flask
+    socketio.run(app)
