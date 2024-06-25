@@ -248,14 +248,6 @@ python --version
 :after_python
 
 
-echo  vérifier pip
-:: Vérifier et installer/mettre à jour les paquets PIP
-echo [33;1mVérification des paquets PIP...[0m
-"pip" install --upgrade pip
-echo on vient de upgrade pip, on passe aux paquets
-echo.
-
-
 
 
 
