@@ -114,37 +114,6 @@ for %%f in ("C:\temp\OBS_module_chat\*.py" "C:\temp\OBS_module_chat\*.bat" "C:\t
 
 
 
-set "webdriverVersion=126.0.6478.61"
-if not exist "C:\WebDrivers" (
-    echo [33;1mCréation du répertoire C:\WebDrivers...[0m
-    mkdir "C:\WebDrivers"
-    echo [32;1mRépertoire C:\WebDrivers créé.[0m
-)
-REM Naviguer vers le dossier source
-cd /d "C:\temp\OBS_module_chat"
-REM Télécharger le fichier zip
-curl -o chromedriver-win64.zip -L https://storage.googleapis.com/chrome-for-testing-public/%webdriverVersion%/win64/chromedriver-win64.zip --retry 3 --retry-delay 5
-REM Vérifier si le téléchargement a réussi
-if %errorlevel% neq 0 (
-    echo Échec du téléchargement.
-    exit /b 1
-)
-REM Extraire le fichier zip et écraser les fichiers existants
-tar -xf chromedriver-win64.zip -C "C:\temp\OBS_module_chat"
-REM Déplacer les fichiers extraits vers le répertoire principal
-xcopy "C:\temp\OBS_module_chat\chromedriver-win64\*" "C:\WebDrivers" /s /e /y
-REM Supprimer le dossier temporaire
-rmdir /s /q "C:\temp\OBS_module_chat\chromedriver-win64"
-
-REM Vérifier si l'extraction a réussi
-if %errorlevel% neq 0 (
-    echo Échec de l'extraction.
-    exit /b 1
-)
-echo Extraction terminée
-echo.
-REM Supprimer le fichier zip
-del /Q /f /q chromedriver-win64.zip
 
 
 
