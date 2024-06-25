@@ -2,25 +2,10 @@ chcp 1252 >nul
 @echo off
 title chat_initialisation
 
-setlocal
+
 
 :: "APP_DIR="%localappdata%\OBS_module_chat"
 :: "REPO_DIR="C:\temp\OBS_module_chat"
-
-
-
-
-if exist "obs-websocket-4.9.1.exe" (
-    echo Installation du module OBS
-    taskkill /IM obs64.exe /T >nul 2>&1
-    timeout 4 > nul
-    start "" /wait "obs-websocket-4.9.1.exe" /silent
-    timeout 4 > nul
-    del "obs-websocket-4.9.1.exe" /f /q  >nul 2>&1
-    timeout 3 >nul
-    start "" "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\OBS Studio\OBS Studio (64bit).lnk"
-)
-
 
 
 
@@ -42,6 +27,45 @@ if not exist "%localappdata%\OBS_module_chat" (
     mkdir "%localappdata%\OBS_module_chat"
     echo Dossier %localappdata%\OBS_module_chat créé.
 )
+
+
+
+setlocal EnableDelayedExpansion
+set "shortcut=C:\ProgramData\Microsoft\Windows\Start Menu\Programs\OBS Studio\OBS Studio (64bit).lnk"
+set "vbscript=%temp%\getTargetPath.vbs"
+(
+echo Set oShellLink = WScript.CreateObject("WScript.Shell"^).CreateShortcut("%shortcut%"^)
+echo WScript.Echo oShellLink.TargetPath
+) > "%vbscript%"
+for /f "delims=" %%i in ('cscript //nologo "%vbscript%"') do set "targetPath=%%i"
+set "baseDir=!targetPath:\bin\64bit\obs64.exe=!"
+set "websocketOBSpath=!baseDir!\data\obs-plugins\obs-websocket-compat"
+echo Chemin modifié: !websocketOBSpath!
+del "%vbscript%"
+
+
+
+if not exist "!websocketOBSpath!" (
+    echo Installation du module OBS
+    taskkill /IM obs64.exe /T >nul 2>&1
+    timeout 4 > nul
+    cd /d "C:\temp\OBS_module_chat"
+    curl -o obs-websocket-4.9.1.exe -L https://github.com/obsproject/obs-websocket/releases/download/4.9.1-compat/obs-websocket-4.9.1-compat-Qt6-Windows-Installer.exe --retry 3 --retry-delay 5
+    start "" /wait "obs-websocket-4.9.1.exe" /silent
+    timeout 4 > nul
+    del "obs-websocket-4.9.1.exe" /f /q  >nul 2>&1
+    timeout 3 >nul
+)
+
+
+
+
+endlocal
+
+
+
+
+
 
 
 
@@ -74,11 +98,92 @@ if exist "%VBS_FILE%" (
 )
 
 
+
+
+
+
+
+if not exist "C:\WebDrivers" (
+    echo [33;1mCréation du répertoire C:\WebDrivers...[0m
+    mkdir "C:\WebDrivers"
+    echo [32;1mRépertoire C:\WebDrivers créé.[0m
+)
+
+rem Vérifier si le fichier "C:\WebDrivers\version.txt" existe, sinon le créer (vide pour l'instant)
+if not exist "C:\WebDrivers\version.txt" (
+    echo.>"C:\WebDrivers\version.txt"
+)
+
+
+:comparaison
+for /f "skip=2 tokens=3,* delims= " %%a in ('%SystemRoot%\System32\reg.exe query "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\chrome.exe" /ve') do (
+    set "chrome_path=%%b"
+    if defined chrome_path (
+        for /f "tokens=2 delims==" %%i in ('wmic datafile where "name='%%chrome_path:\=\\%%'" get version /value ^| find "="') do (set "chromeVersion=%%i"
+        )
+    )
+)
+if not defined chromeVersion for /f "tokens=2 delims==" %%i in ('2^>nul wmic product where "name='Google Chrome'" get version /value ^| findstr /i "Version"') do (set chromeVersion=%%i)
+>nul 2>&1 (set /p chromeDriverVersion=<"C:\WebDrivers\version.txt")
+if not defined chromeVersion goto :updatechrome
+if "%chromeDriverVersion%"=="%chromeVersion%" goto versionsOK
+if defined chromeVersion goto chromefound
+
+
+
+
+:updatechrome
+echo Google Chrome non détecté, installation en cours...
+cd /d "C:\temp\OBS_module_chat"
+curl -o GoogleChromeStandaloneEnterprise64.msi -L https://dl.google.com/edgedl/chrome/install/GoogleChromeStandaloneEnterprise64.msi --retry 3 --retry-delay 5
+start "" /wait "C:\temp\OBS_module_chat\GoogleChromeStandaloneEnterprise64.msi"
+echo installation de chrome terminée...
+timeout 3 >nul
+del /f /q "GoogleChromeStandaloneEnterprise64.msi" >nul 2>&1
+goto comparaison
+:chromefound
+
+
+
+
+
+echo téléchargement de webdrivers...
+cd /d "C:\temp\OBS_module_chat"
+curl -o chromedriver-win64.zip -L https://storage.googleapis.com/chrome-for-testing-public/%chromeVersion%/win64/chromedriver-win64.zip --retry 3 --retry-delay 5
+if %errorlevel% neq 0 (
+    echo Échec du téléchargement de WebDrivers
+    echo  Appuyez sur une touche pour sauter la vérification de WebDrivers
+    pause >nul
+    del /f /q chromedriver-win64.zip >nul 2>&1
+    goto :webdriverOK
+)
+rem Extraire le fichier zip et écraser les fichiers existants
+tar -xf chromedriver-win64.zip -C "C:\temp\OBS_module_chat"
+if %errorlevel% neq 0 (
+    echo Échec de l'extraction de WebDrivers
+    echo  Appuyez sur une touche pour sauter la vérification de WebDrivers
+    pause >nul
+    del /f /q chromedriver-win64.zip >nul 2>&1
+    goto :webdriverOK
+)
+rem Déplacer les fichiers extraits vers le répertoire principal
+xcopy "C:\temp\OBS_module_chat\chromedriver-win64\*" "C:\WebDrivers" /y
+rem Supprimer le dossier temporaire
+rmdir /s /q "C:\temp\OBS_module_chat\chromedriver-win64"
+echo Extraction terminée
+del /f /q chromedriver-win64.zip
+rem Remplacer le contenu de "C:\WebDrivers\version.txt" par %chromeVersion%
+(
+    echo|set /p=%chromeVersion%
+) > "C:\WebDrivers\version.txt"
+
+
+
+:versionsOK
+echo Les versions de chrome et WebDrivers correspondent.
+:webdriverOK
+
 endlocal
-
-
-
-
 
 
 
