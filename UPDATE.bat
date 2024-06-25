@@ -105,7 +105,7 @@ set "SCRIPT_NAME=%~nx0"
 echo [33;1mVérification des fichiers nécessaires...[0m
 echo.
 :: Boucle pour chaque fichier .py et .bat dans %~dp0
-for %%f in ("C:\temp\OBS_module_chat\*.py" "C:\temp\OBS_module_chat\*.bat" "C:\temp\OBS_module_chat\*.html" "C:\temp\OBS_module_chat\*.ini") do (
+for %%f in ("C:\temp\OBS_module_chat\*.py" "C:\temp\OBS_module_chat\*.bat" "C:\temp\OBS_module_chat\*.html" "C:\temp\OBS_module_chat\*.ini" "C:\temp\OBS_module_chat\*.js" "C:\temp\OBS_module_chat\*.png") do (
     echo Appel de :copy_if_newer "%%f" "%DEST_DIR%\%%~nxf"
     call :copy_if_newer "%%f" "%DEST_DIR%\%%~nxf"
     echo.
