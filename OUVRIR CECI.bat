@@ -210,8 +210,9 @@ if "%ERRORLEVEL%"=="0" (
     )
     "bitsadmin.exe" /transfer "PythonInstaller" "https://www.python.org/ftp/python/3.12.4/python-3.12.4-amd64.exe" "C:\temp\OBS_module_chat\python-installer.exe"
     echo Lancement de l'installation de Python, patientez...
-    echo. & echo  [31;1m Vérifiez LA BARRE DES TACHES si jamais une application CLIGNOTE ORANGE, 
-    echo      dans ce cas il faut ACCORDER LES DROITS D'ADMIN ! [0m
+    echo.
+    echo     [31;1m Vérifiez LA BARRE DES TACHES si jamais une application CLIGNOTE ORANGE,  [0m
+    echo     [31;1m dans ce cas il faut ACCORDER LES DROITS D'ADMIN ! [0m
     "C:\temp\OBS_module_chat\python-installer.exe" /quiet InstallAllUsers=1 PrependPath=1 DefaultCustomInstall=1 DefaultPath=%installDir%
     :waitForInstaller
     timeout 5 >nul
