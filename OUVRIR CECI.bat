@@ -1,5 +1,6 @@
-chcp 1252 >nul
+
 @echo off
+chcp 65001 >nul
 title chat_initialisation
 
 
@@ -63,7 +64,7 @@ if not exist "!websocketOBSpath!" (
 endlocal
 
 
-
+chcp 1252 >nul
 
 
 
