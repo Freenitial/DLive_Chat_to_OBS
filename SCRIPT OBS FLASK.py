@@ -10,14 +10,13 @@ import random
 import tkinter as tk
 from tkinter import ttk
 import queue
-
 import tempfile
 
 retry = 0
 def install_required_packages():
     try:
-        print("Attempting to install/upgrade packages...")
-        command = 'python -m pip install --upgrade selenium obs-websocket-py flask flask-cors flask-socketio pillow requests colorama pymupdf svglib; pause'
+        print("Attempting to install/upgrade PIP packages...")
+        command = 'python -m pip install --upgrade selenium obs-websocket-py flask flask-cors flask-socketio pillow requests colorama beautifulsoup4 pymupdf svglib'
         powershell_command = f"Start-Process -FilePath 'powershell.exe' -ArgumentList '-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', \"{command}\" -Wait -Verb RunAs"
         
         # Print the command for verification
@@ -55,6 +54,7 @@ def try_import():
         import fitz
         from svglib.svglib import svg2rlg
         from reportlab.graphics import renderPDF
+        from bs4 import BeautifulSoup
         print("All modules imported successfully.")
     except Exception as e:
         retry += 1
@@ -86,6 +86,7 @@ import requests
 import fitz
 from svglib.svglib import svg2rlg
 from reportlab.graphics import renderPDF
+from bs4 import BeautifulSoup
 
 working_folder = os.path.join(os.environ.get("LOCALAPPDATA"), 'OBS_module_chat')
 settings_ini_path = os.path.join(working_folder, 'config.ini')
@@ -520,7 +521,6 @@ def split_message(message):
         #if old_gift_value and new_gift_value:
             #content = re.sub(r'(?<=\s)(\d+)(?=\s)', lambda m: new_gift_value if m.group(1) == old_gift_value else m.group(1), content, 1)
 
-        print(f"\n AFTER SPLIT MESSAGE full :\n  timestamp={timestamp}\n  pseudo={pseudo}\n  content={content}\n  avatar={avatar}\n  badges={badges}\n")
     except ValueError:
         print(f"\n AFTER SPLIT MESSAGE ValueError :\n  message={message}\n")
         return None, None, message, None, []
@@ -540,6 +540,7 @@ class MessageManager:
         self.socketio = socketio
 
     def process_message(self, timestamp, pseudo, content, avatar, badges, is_gift):
+        print("\nFrom python to HTML : ", '\n  --> timestamp=', timestamp, ' /  is GIFT=', is_gift, ' /  pseudo=', pseudo, '\n  --> avatar=', avatar, '\n  --> content=', content, "\n")
         self.socketio.emit('new_message', {'timestamp': timestamp, 'pseudo': pseudo, 'content': content, 'avatar': avatar, 'badges': badges, 'is_gift': str(is_gift).lower()})
 
     def delete_message(self, content, pseudo, is_gift):
@@ -689,9 +690,9 @@ class Scrapper:
             target_node = soup.select_one('div.chat-row-wrap')
             if not target_node:
                 return
-            print('Observing targetNode:', target_node)
+            print('Observing targetNode manual div')
             message_text, is_gift = extract_message_text(target_node)
-            print("IS GIFT :", is_gift)
+            print("manual div IS GIFT :", is_gift)
 
             timestamp, pseudo, content, avatar, badges = split_message(message_text)
             
@@ -788,12 +789,16 @@ class Scrapper:
                         print("Erreur lors de l'ouverture de l'image : ", e)
                         return jsonify({'status': 'error', 'message': 'Failed to open image'}), 500
                 
-                if not is_avatar and emoji_extension != '.gif':
+                if emoji_extension != '.gif':
                     try:
-                        max_size = 18 if is_badge else 150 if "/emote/" in emoji_link else 38 
-                        ratio = min(max_size / image.width, max_size / image.height)
-                        image = image.resize((int(image.width * ratio), int(image.height * ratio)), Image.LANCZOS)
-                        print(f"Image redimensionnée avec succès à {max_size}x{max_size}")
+                        max_size = 18 if is_badge else 50 if is_avatar else 150 if "/emote/" in emoji_link else 38 
+                        # Ajout de la condition pour redimensionner uniquement si nécessaire
+                        if not (is_avatar and (image.width == 50 or image.height == 50)):
+                            ratio = min(max_size / image.width, max_size / image.height)
+                            image = image.resize((int(image.width * ratio), int(image.height * ratio)), Image.LANCZOS)
+                            print(f"Image redimensionnée avec succès à {max_size}x{max_size}")
+                        else:
+                            print("Aucun redimensionnement nécessaire pour l'avatar")
                     except Exception as e:
                         print("Erreur lors du redimensionnement de l'image : ", e)
                         return jsonify({'status': 'error', 'message': 'Failed to resize image'}), 500
@@ -975,8 +980,8 @@ def main_thread():
                         read_config(forced=True)
                 except queue.Empty:
                     pass
-            
-            time.sleep(0.1)
+            notifier.process_manual_div()
+            time.sleep(5)
     except KeyboardInterrupt:
         print("Script interrompu par l'utilisateur.")
     finally:
