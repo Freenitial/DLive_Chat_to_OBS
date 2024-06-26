@@ -67,7 +67,7 @@
             padding-right: 7px;
             border-radius: 12px;
             background-color: #3e3e3e;
-            animation: fadeIn 0.5s ease-in-out;
+            animation: fadeIn 0.7s ease-in-out;
             transition: opacity 0.5s ease-in-out;
         }
 
@@ -124,48 +124,112 @@
 
         .message.lemon {
             background-color: rgb(238, 207, 48);
-            animation: specialAnimation 1s ease-in-out;
+            animation: superDingue 1s;
         }
 
         .message.icecream {
             background-color: rgb(211, 225, 230);
-            animation: specialAnimation 1s ease-in-out;
+            animation: superDingue 2s ease-in-out;
         }
 
         .message.diamond {
             background-color: rgb(71, 199, 241);
-            animation: specialAnimation 1s ease-in-out;
+            animation: superDingue 3s ease-in-out, pulsation 2s 3s 10;
         }
 
         .message.ninjaghini {
             background-color: red;
-            animation: specialAnimation 1s ease-in-out;
+            animation: superDingue 4s ease-in-out, pulsation 1s 4s infinite ease-in-out;
         }
 
         .message.ninjet {
             background-color: rgb(170, 0, 255);
-            animation: specialAnimation 1s ease-in-out;
+            animation: superDingue 5s ease-in-out, pulsation 0.5s 5s infinite ease-in-out;
         }
         .message.gift .username {
             color: black;
         }
 
-        @keyframes fadeIn {
-            from {
+
+
+        .animated-text-container {
+            animation: newTextAnimation 0.4s ease-in-out;
+        }
+
+
+        @keyframes newTextAnimation {
+            0% {
                 opacity: 0;
-                transform: translateY(-10px);
+                transform: translateY(10px);
             }
-            to {
+            100% {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
 
-        @keyframes specialAnimation {
-            0% { opacity: 0; transform: translateY(-10px); }
-            50% { opacity: 0.5; transform: translateY(-5px); }
-            100% { opacity: 1; transform: translateY(0); }
+
+
+
+
+        @keyframes superDingue {
+            0% {
+                opacity: 0;
+                transform: translateY(-100px) rotate(0deg);
+            }
+            25% {
+                opacity: 0.5;
+                transform: translateY(50px) rotate(90deg);
+            }
+            50% {
+                opacity: 1;
+                transform: translateY(0) rotate(-180deg);
+            }
+            75% {
+                opacity: 0.5;
+                transform: translateY(-50px) rotate(-270deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) rotate(-360deg);
+            }
+        }        
+
+
+
+
+        @keyframes pulsation {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+            }
         }
+
+
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(100px) scale(0.6);
+            }
+            75% {
+                opacity: 0.75;
+                transform: translateY(25px) scale(1.1);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+
+
+
 
         @keyframes fadeOut {
             from {
@@ -177,6 +241,12 @@
                 transform: translateY(10px);
             }
         }
+
+
+
+
+
+
         #fixed-header-container {
             position: absolute;
             top: 0;
@@ -328,7 +398,9 @@
 
         async function handleNewMessage(timestamp, username, text, avatarLink = null, badgesLinks = [], is_gift) {
             const { processedText, avatarPath, badgePaths, emojiUrls } = await processNewMessage(text, avatarLink, badgesLinks, is_gift);
-            
+            if (is_gift) {
+                console.error('HANDLE_NEW_MESSAGE, GIFT = ', is_gift);
+            }
             let newText = processedText;
             if (is_gift) { // Supprimez le début de messageText jusqu'au premier chiffre
                 newText = newText.replace(/^[^\d]*(?=\d)/, '').trim();
@@ -573,18 +645,21 @@
 
 
         function addMessage(timestamp, username, processedText, avatar, badges, is_gift) {
+            if (is_gift) {
+                console.error('ADD_MESSAGE, GIFT = ', is_gift);
+            }
             const chatPanel = document.getElementById('chat-panel');
             const fixedHeaderDiv = document.getElementById('fixed-header');
             const lastMessageDiv = chatPanel.lastElementChild;
             let messageDiv;
             let shouldCreateHeader = true;
 
-            // console.log(' ___________ timestamp :', timestamp);
-            // console.log(' ___________ username :', username);
-            // console.log(' ___________ processedText :', processedText);
-            // console.log(' ___________ avatar :', avatar);
-            // console.log(' ___________ badges :', badges);
-            // console.log(' ___________ is_gift :', is_gift);
+            // console.log('   ___________ timestamp :', timestamp);
+            // console.log('   ___________ username :', username);
+            // console.log('   ___________ processedText :', processedText);
+            // console.log('   ___________ avatar :', avatar);
+            // console.log('   ___________ badges :', badges);
+            // console.log('   ___________ is_gift :', is_gift);
 
             if (lastMessageDiv) {
                 const lastUsernameSpan = lastMessageDiv.querySelector('.username');
@@ -607,8 +682,12 @@
                         const timeDifference = (currentTime - lastTime) / (1000 * 60); // différence en minutes
 
                         if (timeDifference <= 5) {
-                            messageDiv = lastMessageDiv;
-                            shouldCreateHeader = false;
+                            const messageDivHeight = lastMessageDiv.offsetHeight;
+                            const chatPanelHeight = chatPanel.offsetHeight;
+
+                            if (messageDivHeight <= chatPanelHeight / 2) {
+                                messageDiv = lastMessageDiv;
+                                shouldCreateHeader = false;
                         }
                     }
                 }
@@ -618,9 +697,7 @@
                 messageDiv = document.createElement('div');
                 messageDiv.classList.add('message');
 
-                if (is_gift) {
-                    messageDiv.classList.add('gift');
-                }
+
                 
                 messageDiv.setAttribute('data-username', username);
 
@@ -630,13 +707,30 @@
                 const usernameSpan = document.createElement('span');
                 usernameSpan.classList.add('username');
                 usernameSpan.textContent = username ? `${username}` : '';
+                usernameSpan.style.paddingLeft = '5px';
+                usernameSpan.style.paddingRight = '5px';
+
+
                 if (is_gift) {
-                    usernameSpan.style.color = 'black';
+                    messageDiv.classList.add('gift');
+                    console.error('THIS IS DEFINITIVLY A GIFT :');
+                    const giftType = extractGiftTypeFromText(processedText.toLowerCase());
+                    console.error(giftType);
+                    if (giftType === 'lemon') {
+                        messageDiv.classList.add('lemon');
+                    } else if (giftType === 'icecream') {
+                        messageDiv.classList.add('icecream');
+                    } else if (giftType === 'diamond') {
+                        messageDiv.classList.add('diamond');
+                    } else if (giftType === 'ninjaghini') {
+                        messageDiv.classList.add('ninjaghini');
+                    } else if (giftType === 'ninjet') {
+                        messageDiv.classList.add('ninjet');
+                    }
                 } else {
                     usernameSpan.style.color = getColorForUser(username);
                 }
-                usernameSpan.style.paddingLeft = '5px';
-                usernameSpan.style.paddingRight = '5px';
+
 
                 if (avatar) {
                     const avatarDiv = document.createElement('div');
@@ -686,6 +780,11 @@
             textSpan.classList.add('text');
             textSpan.innerHTML = processedText;
 
+            const existingTextSpans = messageDiv.getElementsByClassName('text');
+            if (existingTextSpans.length > 0) {
+                messageContentDiv.classList.add('animated-text-container');
+            }
+
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = processedText;
             const images = tempDiv.getElementsByTagName('img');
@@ -726,10 +825,14 @@
                 // console.log('All images loaded or failed to load.');
             });
 
+
+
+
+
             function checkAndFixHeader() {
                 const messages = document.getElementsByClassName('message');
                 let found = false;
-                const tolerance = 35;
+                const tolerance = 33;
                 const fixedHeaderContainer = document.getElementById('fixed-header-container');
                 const fixedHeaderDiv = document.getElementById('fixed-header');
                 const chatPanelRect = document.getElementById('chat-panel').getBoundingClientRect();
@@ -780,27 +883,15 @@
 
 
 
+            // ==========================     CODE PUTTED HERE     ==============================
+            // ========================    WILL NOT BE EXECUTED     =============================
+            // =============    WHEN FIXEDHEADER HIDDEN BETWEEN 2 MESSAGEDIVS  ==================
 
 
-            // console.log('Message added: ', { avatar, badges, timestamp, username, processedText });
 
-            // Ajouter la logique d'animation spéciale pour les cadeaux
-            if (is_gift) {
-                console.error('THIS IS A GIFT :');
-                const giftType = extractGiftTypeFromText(processedText.toLowerCase());
-                console.error(giftType);
-                if (giftType === 'lemon') {
-                    messageDiv.classList.add('lemon');
-                } else if (giftType === 'icecream') {
-                    messageDiv.classList.add('icecream');
-                } else if (giftType === 'diamond') {
-                    messageDiv.classList.add('diamond');
-                } else if (giftType === 'ninjaghini') {
-                    messageDiv.classList.add('ninjaghini');
-                } else if (giftType === 'ninjet') {
-                    messageDiv.classList.add('ninjet');
-                }
-            }
+            
+
+
         }
 
 
