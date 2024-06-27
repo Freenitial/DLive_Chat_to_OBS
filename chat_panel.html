@@ -5,33 +5,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat Panel</title>
     <style>
+        /* RESTE A SUPPRIMER OVERFLOW TOP ---  OK   */
+        :root {
+            --resolution-x: 1080;
+            --resolution-y: 1920;
+            --darkest-bg-color: #1e1e1e;
+            --dark-bg-color: #2e2e2e;
+            --screen-ratio: calc(var(--resolution-x) * var(--resolution-y));
+            --ratio-margin: calc(var(--screen-ratio) / 75000 * 1px);
+            --top: 350px;
+            --left: 50px;
+            --chat-width: calc(var(--resolution-x) / 5 * 1px);
+            --chat-height: calc(var(--resolution-y) / 5 * 3 * 1px);
+            --fixed-header-width: calc(var(--chat-width) / 2);
+            --fixed-header-left: calc(var(--left) + (var(--chat-width) - var(--fixed-header-width)) / 2);
+        }
         body {
+            width: var(--resolution-x);
+            height: var(--resolution-y);
             margin: 0;
             padding: 0;
+            height: 100vh;
             font-family: Arial, sans-serif;
             background-color: #1e1e1e;
-            color: #ffffff;
+            color: violet;
             overflow: hidden;
         }
         #chat-panel-container {
-            width: 408px;
-            height: 668px;
-            padding: 5px;
-            padding-top: 6px;
-            background-color: transparent; /*#2e2e2e*/
-            /* border-radius: 16px;*/
-            overflow: hidden; /* Pour s'assurer que les éléments ne débordent pas */
+            width: 100%;
+            height: 100%;
+            background-color: transparent; /* transparent*/
+            border-radius: 16px;
+            overflow: hidden; /* Pour que la barre de défilement ne s'affiche pas */
             position: relative; /* Pour que le header fixe soit contenu */
         }
         #chat-panel {
-            height: 100%;
-            overflow-y: scroll; /* Permettre le défilement vertical */
+            width: var(--chat-width);
+            height: var(--chat-height);
+            background-color: white; 
+            border-color: red;
+            overflow: hidden; /* Permettre le défilement vertical */
             word-wrap: break-word;
             white-space: pre-wrap;
             scrollbar-width: none; /* Firefox */
             -ms-overflow-style: none;  /* IE and Edge */
-            border-radius: 16px 16px 0 0; /* Ajout de radius en haut */
+            border-radius: 16px; /* Ajout de radius en haut */
+            position: relative;
+            top: var(--top);
+            left: var(--left);
         }
+        .message {
+            margin-bottom: 5px;
+            padding-top: 3px;
+            padding-bottom: 5px;
+            padding-left: 7px;
+            padding-right: 7px;
+            border-radius: 12px;
+            background-color: #3e3e3e;
+            animation: fadeIn 0.7s ease-in-out;
+            transition: opacity 0.5s ease-in-out;
+            position: relative;
+        }
+        #animation-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: var(--top);
+            left: var(--left);
+            pointer-events: none; /* Pour ne pas interférer avec les interactions utilisateur */
+        }
+        #fixed-header-container {
+            position: absolute;
+            top: var(--top);
+            left: var(--fixed-header-left);
+            width: var(--fixed-header-width);
+            z-index: 1000;
+            display: none;
+            text-align: center;
+        }
+
+         /* =========================================================== */
+
+
+         
+
 
         #chat-panel::-webkit-scrollbar {
             display: none; /* Chrome, Safari and Opera */
@@ -59,17 +116,7 @@
             border-radius: 50%;
         }
 
-        .message {
-            margin-bottom: 5px;
-            padding-top: 3px;
-            padding-bottom: 5px;
-            padding-left: 7px;
-            padding-right: 7px;
-            border-radius: 12px;
-            background-color: #3e3e3e;
-            animation: fadeIn 0.7s ease-in-out;
-            transition: opacity 0.5s ease-in-out;
-        }
+
 
         .message.removing {
             opacity: 0;
@@ -157,10 +204,12 @@
         }
 
 
+
+
         @keyframes newTextAnimation {
             0% {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateX(10px);
             }
             100% {
                 opacity: 1;
@@ -175,23 +224,23 @@
         @keyframes superDingue {
             0% {
                 opacity: 0;
-                transform: translateY(-100px) rotate(0deg);
+                transform: translateY(-500px) rotate(0deg) scale(1);
             }
             25% {
                 opacity: 0.5;
-                transform: translateY(50px) rotate(90deg);
+                transform: translateY(50px) rotate(90deg) scale(1);
             }
             50% {
                 opacity: 1;
-                transform: translateY(0) rotate(-180deg);
+                transform: translateY(0) rotate(-180deg) scale(1);
             }
             75% {
                 opacity: 0.5;
-                transform: translateY(-50px) rotate(-270deg);
+                transform: translateY(-50px) rotate(-270deg) scale(1);
             }
             100% {
                 opacity: 1;
-                transform: translateY(0) rotate(-360deg);
+                transform: translateY(0) rotate(-360deg) scale(1);
             }
         }        
 
@@ -215,15 +264,15 @@
         @keyframes fadeIn {
             0% {
                 opacity: 0;
-                transform: translateY(100px) scale(0.6);
+                transform: translateY(-400px) translateX(+1100px) scale(0.6);
             }
             75% {
                 opacity: 0.75;
-                transform: translateY(25px) scale(1.1);
+                transform: translateY(0) translateX(+300px) scale(1.1);
             }
             100% {
                 opacity: 1;
-                transform: translateY(0) scale(1);
+                transform: translateY(0)  translateX(0) scale(1);
             }
         }
 
@@ -247,17 +296,6 @@
 
 
 
-        #fixed-header-container {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(100% - 150px);
-            z-index: 1000;
-            display: none;
-            margin-top: 6px;
-            text-align: center;
-        }
 
         #fixed-header-border {
             position: absolute;
@@ -300,6 +338,27 @@
 
     </style>
     <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <script>
+        function updateCSSVariables() {
+            const root = document.documentElement;
+            const resolutionX = window.innerWidth;
+            const resolutionY = window.innerHeight;
+    
+            root.style.setProperty('--resolution-x', resolutionX);
+            root.style.setProperty('--resolution-y', resolutionY);
+    
+            console.log('Resolution X:', resolutionX);
+            console.log('Resolution Y:', resolutionY);
+        }
+    
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCSSVariables();
+        });
+    
+        window.addEventListener('resize', () => {
+            updateCSSVariables();
+        });
+    </script>
 </head>
 <body>
     <div id="chat-panel-container">
@@ -308,9 +367,13 @@
             <div id="fixed-header"></div>
         </div>
         <div id="chat-panel"></div>
+        <div id="animation-container"></div>
+    </div>
     <script>
         const socket = io();
-
+        const chatPanel = document.getElementById('chat-panel');
+        const chatPanelContainer = document.getElementById('chat-panel-container');
+        const animationContainer = document.getElementById('animation-container');
         const colors = [
             '#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6', 
             '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D',
@@ -326,6 +389,7 @@
 
         let showAvatar = null;
         let showBadges = null;
+        let showDebugColors = null;
 
         console.stdlog = console.log.bind(console);
         console.stdwarn = console.warn.bind(console);
@@ -336,6 +400,7 @@
             const config = await response.json();
             showAvatar = config.show_avatar;
             showBadges = config.show_badges;
+            debug = config.debug;
         }
         fetchConfig();
 
@@ -439,7 +504,7 @@
 
 
         function findRecentGiftMessage(username, text) {
-            const chatPanel = document.getElementById('chat-panel');
+            
             const messageDivs = chatPanel.getElementsByClassName('message');
             const giftType = extractGiftTypeFromText(text);
 
@@ -648,7 +713,7 @@
             if (is_gift) {
                 console.error('ADD_MESSAGE, GIFT = ', is_gift);
             }
-            const chatPanel = document.getElementById('chat-panel');
+            
             const fixedHeaderDiv = document.getElementById('fixed-header');
             const lastMessageDiv = chatPanel.lastElementChild;
             let messageDiv;
@@ -770,7 +835,60 @@
 
                 messageDiv.appendChild(headerSpan);
 
-                chatPanel.appendChild(messageDiv);
+                
+                let clonedMessageDiv = messageDiv
+
+                // Ajouter temporairement le message au DOM pour obtenir ses dimensions
+                document.body.appendChild(messageDiv);
+
+                // Forcer un reflow pour obtenir les dimensions correctes
+                const messageDivHeight = messageDiv.offsetHeight;
+
+                // Retirer le message du DOM après avoir obtenu ses dimensions
+                document.body.removeChild(messageDiv);
+
+                // Calculer la position de départ de l'animation
+                const rootStyles = getComputedStyle(document.documentElement);
+                const resolutionX = parseInt(rootStyles.getPropertyValue('--resolution-x'));
+                const visibleBottom = parseInt(rootStyles.getPropertyValue('--resolution-y')) / 5 * 3 - messageDivHeight * 2;
+                const realMarginTop = parseInt(rootStyles.getPropertyValue('--top'));
+                const realChatHeight = parseInt(rootStyles.getPropertyValue('--chat-height'));
+                console.log('realMarginTop:', messageDivHeight);
+                const lastMessagePosition = lastMessageDiv ? lastMessageDiv.offsetTop + lastMessageDiv.offsetHeight : 0;
+
+                const startPositionY = Math.min(lastMessagePosition, visibleBottom);
+
+                clonedMessageDiv.style.top = `${startPositionY}px`;
+
+                console.log('messageDivHeight:', messageDivHeight);
+                console.log('lastMessagePosition:', lastMessagePosition);
+                console.log('visibleBottom:', visibleBottom);
+                console.log('startPositionY:', startPositionY);
+                
+                console.warn('chatPanel.clientWidth =', chatPanel.clientWidth);
+                console.warn('chatPanel.clientHeight =', chatPanel.clientHeight);
+                console.warn('messageDiv.offsetWidth =', messageDiv.offsetWidth);
+
+                const startPositionX = (chatPanel.clientWidth) / 2;
+                clonedMessageDiv.style.width = `${chatPanel.clientWidth}px`;
+
+                
+
+
+
+
+                
+                animationContainer.appendChild(clonedMessageDiv);
+                clonedMessageDiv.addEventListener('animationend', () => {
+                    animationContainer.removeChild(clonedMessageDiv);
+                    messageDiv.style.animation = 'none';
+                    messageDiv.style.top = 'auto';
+                    messageDiv.style.left = `${(chatPanel.clientWidth - messageDiv.offsetWidth) / 2}px`;
+                    messageDiv.style.transform = 'translateX(-50%)';
+                    messageDiv.style.width = '98%';
+                    chatPanel.appendChild(messageDiv);
+                    chatPanel.scrollTop = chatPanel.scrollHeight;
+                });
             }
 
             const messageContentDiv = document.createElement('div');
@@ -907,7 +1025,7 @@
             content = await convertEmojiLinks(content);
             // console.log('CONTENT TO SUPPRESS: ', content);
 
-            const chatPanel = document.getElementById('chat-panel');
+            
             const messageDivs = chatPanel.getElementsByClassName('message');
             const messagesToDelete = [];
 
