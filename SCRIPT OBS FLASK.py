@@ -446,17 +446,12 @@ def main_loop():
     try:
         connect_ws()
         if not check_chat_obs():
-            
             show_dialog(root)
     except Exception as e:
         show_error_image("ACTIVEZ WEBSOCKET DANS OBS COMME CECI\nParamètre absent ? Relancez OBS")
     root.quit()
-
-# Démarrage de la boucle de vérification
-
 connect_ws()
 try:
-    
     main_loop()
 finally:
     disconnect_ws()
@@ -535,19 +530,16 @@ def split_message(message):
 
 
 class MessageManager:
-    def __init__(self, socketio):
-        #self.messages = []
-        self.socketio = socketio
+    def __init__(self, socketio_to_myHTML):
+        self.socketio_to_myHTML = socketio_to_myHTML
 
     def process_message(self, timestamp, pseudo, content, avatar, badges, is_gift):
         print("\nFrom python to HTML : ", '\n  --> timestamp=', timestamp, ' /  is GIFT=', is_gift, ' /  pseudo=', pseudo, '\n  --> avatar=', avatar, '\n  --> content=', content, "\n")
-        self.socketio.emit('new_message', {'timestamp': timestamp, 'pseudo': pseudo, 'content': content, 'avatar': avatar, 'badges': badges, 'is_gift': str(is_gift).lower()})
+        self.socketio_to_myHTML.emit('new_message', {'timestamp': timestamp, 'pseudo': pseudo, 'content': content, 'avatar': avatar, 'badges': badges, 'is_gift': str(is_gift).lower()})
 
     def delete_message(self, content, pseudo, is_gift):
-        self.socketio.emit('delete_message', {'pseudo': pseudo, 'content': content, 'is_gift': str(is_gift).lower()})
+        self.socketio_to_myHTML.emit('delete_message', {'pseudo': pseudo, 'content': content, 'is_gift': str(is_gift).lower()})
 
-    def get_messages(self):
-        return self.messages
 
 
 
