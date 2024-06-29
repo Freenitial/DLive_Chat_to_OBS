@@ -7,18 +7,16 @@
     <style>
         /* RESTE A SUPPRIMER OVERFLOW TOP ---  OK   */
         :root {
-            --resolution-x: 1080; /* default value, updated by script when resize browser */
-            --resolution-y: 1920; /* default value, updated by script when resize browser */
+            --resolution-x: 1080;
+            --resolution-y: 1920;
             --darkest-bg-color: #1e1e1e;
             --dark-bg-color: #2e2e2e;
             --screen-ratio: calc(var(--resolution-x) * var(--resolution-y));
-            --auto-margin: calc(var(--screen-ratio) / 75000 * 1px);      /* not used, but can be used */
+            --ratio-margin: calc(var(--screen-ratio) / 75000 * 1px);
             --top: 350px;
             --left: 17px;
-            --chat-auto-width: calc(var(--resolution-x) / 4 * 1px);      /* not used, but can be used */
-            --chat-auto-height: calc(var(--resolution-y) / 5 * 3 * 1px); /* not used, but can be used */
-            --chat-width: 440px;
-            --chat-height: 600px;
+            --chat-width: calc(var(--resolution-x) / 4 * 1px);
+            --chat-height: calc(var(--resolution-y) / 5 * 3 * 1px);
             --fixed-header-width: calc(var(--chat-width) / 2);
             --fixed-header-left: calc(var(--left) + (var(--chat-width) - var(--fixed-header-width)) / 2);
         }
@@ -38,15 +36,15 @@
             height: 100%;
             background-color: transparent; /* transparent*/
             border-radius: 16px;
-            overflow: hidden; /* Pour que la barre de défilement ne s'affiche pas */
+            overflow: hidden; /* Pour que la barre de dÃ©filement ne s'affiche pas */
             position: relative; /* Pour que le header fixe soit contenu */
         }
         #chat-panel {
-            width: var(--chat-width); /* calc(var(--chat-width) + 1000px); */
-            height: var(--chat-height); /* calc(var(--chat-height) - 100px); */
+            width: calc(var(--chat-width) + 50px);
+            height: calc(var(--chat-height) - 48px);
             background-color: transparent; 
             border-color: red;
-            overflow: hidden; /* Permettre le défilement vertical */
+            overflow: hidden; /* Permettre le dÃ©filement vertical */
             word-wrap: break-word;
             white-space: pre-wrap;
             scrollbar-width: none; /* Firefox */
