@@ -328,7 +328,7 @@ if exist "C:\temp\OBS_module_chat" (
     mkdir "C:\temp\OBS_module_chat"
     echo Dossier C:\temp\OBS_module_chat créé.
     REM Cloner le dépôt
-    git clone https://github.com/djleo70/obs_python_flask.git "C:\temp\OBS_module_chat"
+    git clone https://github.com/djleo70/DLive_Chat_to_OBS.git "C:\temp\OBS_module_chat"
     set "need_update=True"
 )
 
@@ -362,7 +362,7 @@ if exist .git (
     echo "Suppression du répertoire et re-clonage..."
     cd ..
     rmdir /s /q "C:\temp\OBS_module_chat"
-    git clone https://github.com/djleo70/obs_python_flask.git "C:\temp\OBS_module_chat"
+    git clone https://github.com/djleo70/DLive_Chat_to_OBS.git "C:\temp\OBS_module_chat"
     set "need_update=True"
 )
 
